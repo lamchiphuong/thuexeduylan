@@ -291,7 +291,7 @@
     <!-- Tab 1: Quản lý xe -->
     <div id="tab1" class="card" style="display: none;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2><i class="fas fa-car-side"></i> Danh sách xe (Rảnh / Bận)</h2>
+        <h2><i class="fas fa-car-side"></i> Danh sách xe </h2>
         <button class="btn btn-success" onclick="showAddCarModal()">
           <i class="fas fa-plus"></i> Thêm xe mới
         </button>
@@ -408,11 +408,11 @@
         <div class="form-grid">
           <div>
             <label>Giá ngày thường (VNĐ/ngày)</label>
-            <input type="text" id="dailyPrice" class="money-input" placeholder="550 000" required>
+            <input type="text" id="dailyPrice" class="money-input" placeholder="500 000" required>
           </div>
           <div>
             <label>Giá cuối tuần (VNĐ/ngày)</label>
-            <input type="text" id="weekendPrice" class="money-input" placeholder="650 000" required>
+            <input type="text" id="weekendPrice" class="money-input" placeholder="550 000" required>
           </div>
         </div>
 
@@ -500,7 +500,7 @@
           },
           body: JSON.stringify(payload)
         });
-        if (res.ok) showToast("✅ Đã lưu lên JSONBin!");
+        if (res.ok) showToast("✅ Đã lưu dữ liệu");
       } catch (err) {
         showToast("❌ Lỗi lưu dữ liệu: " + err.message, true);
       }
