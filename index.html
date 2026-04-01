@@ -727,7 +727,7 @@
       const remaining = total - (contract.deposit || 0);
       const days = calculateDays(contract.rentDate, contract.returnDate);
 
-      const message = `Khách hàng: ${contract.customer}\nSĐT: ${contract.phone}\nXe: ${contract.carType} - ${contract.plate}\nThời gian: ${formatDate(contract.rentDate)} → ${formatDate(contract.returnDate)} (${days} ngày)\n\nTổng tiền: ${formatMoney(total)} ₫\nĐã cọc: ${formatMoney(contract.deposit || 0)} ₫\nCòn phải thu: ${formatMoney(remaining)} ₫\n\nVui lòng chọn trạng thái thanh toán:`;
+      const message = `Khách hàng: ${contract.customer}\n <br> SĐT: ${contract.phone}\n <br> Xe: ${contract.carType} - ${contract.plate}\n <br> Thời gian: ${formatDate(contract.rentDate)} → ${formatDate(contract.returnDate)} (${days} ngày)\n\n <br> Tổng tiền: ${formatMoney(total)} ₫\nĐã cọc: ${formatMoney(contract.deposit || 0)} ₫\n <br> Còn phải thu: ${formatMoney(remaining)} ₫\n\n <br> Vui lòng chọn trạng thái thanh toán:`;
 
       showConfirm("Xác nhận nhận xe", message, "🚗", (isPaidFull) => {
         contract.status = "Đang thuê";
@@ -912,7 +912,7 @@
         const actionHTML = `
           <button onclick="editContract(${contract.id})" class="btn btn-edit" style="padding:8px 12px;font-size:0.85rem;">Sửa</button>
           ${contract.status === "Chưa nhận xe" ? `<button onclick="confirmReceive(${contract.id})" class="btn btn-success" style="padding:8px 12px;font-size:0.85rem;">Nhận xe</button>` : ''}
-          ${contract.status === "Đang thuê" ? `<button onclick="confirmReturn(${contract.id})" class="btn btn-info" style="padding:8px 12px;font-size:0.85rem;">Đã trả xe</button>` : ''}
+          ${contract.status === "Đang thuê" ? `<button onclick="confirmReturn(${contract.id})" class="btn btn-info" style="padding:8px 12px;font-size:0.85rem;">Trả xe</button>` : ''}
           <button onclick="deleteContract(${contract.id})" class="btn btn-danger" style="padding:8px 12px;font-size:0.85rem;">Hủy</button>
         `;
 
