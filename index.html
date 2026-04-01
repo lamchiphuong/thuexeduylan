@@ -106,6 +106,7 @@
     .btn-danger { background: var(--danger); color: white; }
     .btn-info { background: #0ea5e9; color: white; }
     .btn-warning { background: var(--warning); color: white; }
+    .btn-secondary { background: #64748b; color: white; }
 
     .fab {
       position: fixed;
@@ -145,6 +146,7 @@
       padding: 30px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.2);
       animation: modalPop 0.4s ease;
+      position: relative;
     }
     @keyframes modalPop {
       from { transform: scale(0.7); opacity: 0; }
@@ -161,6 +163,17 @@
       font-size: 1.8rem;
       cursor: pointer;
       color: #94a3b8;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+    .close:hover {
+      background: #f1f5f9;
+      color: #475569;
     }
 
     input, select {
@@ -190,6 +203,7 @@
     .confirm-icon {
       font-size: 3.8rem;
       margin-bottom: 15px;
+      text-align: center;
     }
     .confirm-title {
       font-size: 1.55rem;
@@ -417,7 +431,7 @@
         </select>
 
         <div style="margin-top: 25px; display: flex; gap: 15px;">
-          <button type="button" class="btn" style="flex:1; background:#64748b; color:white;" onclick="closeModal()">Hủy</button>
+          <button type="button" class="btn btn-secondary" style="flex:1;" onclick="closeModal()">Huỷ</button>
           <button type="submit" class="btn btn-primary" style="flex:1;">Lưu hợp đồng</button>
         </div>
       </form>
@@ -449,7 +463,7 @@
         <input type="text" id="holidayPrice" class="money-input" placeholder="Giá ngày lễ/Tết (VNĐ/ngày)" required>
 
         <div style="margin-top: 25px; display: flex; gap: 15px;">
-          <button type="button" class="btn" style="flex:1; background:#64748b; color:white;" onclick="closeCarModal()">Hủy</button>
+          <button type="button" class="btn btn-secondary" style="flex:1;" onclick="closeCarModal()">Huỷ</button>
           <button type="submit" class="btn btn-success" style="flex:1;">Thêm xe</button>
         </div>
       </form>
@@ -462,6 +476,7 @@
       <div class="modal-header" style="justify-content: center; flex-direction: column; text-align: center;">
         <div id="confirmIcon" class="confirm-icon"></div>
         <h2 id="confirmTitle" class="confirm-title"></h2>
+        <span class="close" onclick="closeConfirmModal()" style="position:absolute; top:15px; right:20px;">×</span>
       </div>
       <div id="confirmMessage" class="confirm-message"></div>
       
@@ -491,6 +506,10 @@
       <div style="margin-top:15px; font-size:0.9rem; color:#64748b;">
         <span style="background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:4px;">Đang bận</span>
         <span style="margin-left:15px;">Ngày rảnh: không tô màu</span>
+      </div>
+
+      <div style="margin-top: 25px; text-align: center;">
+        <button onclick="closeScheduleModal()" class="btn btn-secondary" style="min-width: 120px;">Đóng</button>
       </div>
     </div>
   </div>
@@ -596,19 +615,31 @@
     }
 
     function getDayType(d) {
-      const day = new Date(d).getDay();
+      const day = new Date(d).getDay();   // 0 = CN, 6 = T7
       return (day === 0 || day === 6) ? "weekend" : "normal";
     }
 
+    // ==================== SỬA LOGIC TÍNH TIỀN Ở ĐÂY ====================
     function calculateRentalTotal(contract) {
       const car = getCarByPlate(contract.plate);
       if (!car) return 0;
+
       let total = 0;
       let cur = new Date(contract.rentDate);
       const end = new Date(contract.returnDate);
+
       while (cur <= end) {
         const ds = cur.toISOString().split('T')[0];
-        const price = isHoliday(ds) ? car.holiday : (getDayType(ds) === "weekend" ? car.weekend : car.daily);
+
+        let price;
+        if (isHoliday(ds)) {
+          price = car.holiday;                    // Ưu tiên giá ngày lễ
+        } else if (getDayType(ds) === "weekend") {
+          price = car.weekend;
+        } else {
+          price = car.daily;
+        }
+
         total += price;
         cur.setDate(cur.getDate() + 1);
       }
@@ -631,7 +662,7 @@
       return Math.ceil((new Date(ret) - new Date(rent)) / 86400000) + 1;
     }
 
-    // ====================== XÁC NHẬN NHẬN XE (ĐÃ SỬA ĐÚNG) ======================
+    // ====================== XÁC NHẬN ======================
     function confirmReceive(id) {
       const contract = contracts.find(c => c.id === id);
       if (!contract) return;
@@ -1006,13 +1037,11 @@
       await loadData();
       renderAll();
 
-      // Format money input
       ['dailyPrice','weekendPrice','holidayPrice','deposit'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', formatPriceInput);
       });
 
-      // Event cho confirm modal
       document.getElementById('confirmCancelBtn').addEventListener('click', () => {
         if (currentConfirmCallback) currentConfirmCallback(false);
         closeConfirmModal();
@@ -1023,7 +1052,7 @@
         closeConfirmModal();
       });
 
-      console.log("🚀 CarRent đã khởi động thành công");
+      console.log("🚀 CarRent đã khởi động thành công - Logic giá lễ đã sửa");
     };
   </script>
 </body>
