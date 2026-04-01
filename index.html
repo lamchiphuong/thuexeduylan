@@ -86,6 +86,7 @@
     }
     .status.chua-nhan { background: #fef3c7; color: #d97706; }
     .status.dang-thue { background: #dbeafe; color: #1e40af; }
+    .status.dang-thue-paid { background: #a5f3fc; color: #164e63; font-weight: 700; }
     .status.da-hoan-tat { background: #d1fae5; color: #166534; }
     .status.busy { background: #fee2e2; color: #b91c1c; }
     .status.available { background: #ecfdf5; color: #10b981; }
@@ -105,7 +106,7 @@
     .btn-success { background: var(--success); color: white; }
     .btn-danger { background: var(--danger); color: white; }
     .btn-info { background: #0ea5e9; color: white; }
-    .btn-warning { background: var(--warning); color: white; }
+    .btn-edit { background: #8b5cf6; color: white; }
     .btn-secondary { background: #64748b; color: white; }
 
     .fab {
@@ -128,7 +129,6 @@
     }
     .fab:hover { transform: scale(1.1) rotate(90deg); }
 
-    /* ==================== MODAL SCROLL & MOBILE OPTIMIZATION ==================== */
     .modal {
       display: none;
       position: fixed;
@@ -138,20 +138,19 @@
       align-items: center;
       justify-content: center;
       z-index: 2000;
-      padding: 15px; /* thêm padding để tránh sát mép trên mobile */
+      padding: 15px;
     }
 
     .modal-content {
       background: white;
       border-radius: 24px;
-      width: min(95vw, 560px);     /* responsive: không vượt quá màn hình */
-      max-height: 90vh;            /* giới hạn chiều cao */
+      width: min(95vw, 560px);
+      max-height: 90vh;
       padding: 30px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.2);
       animation: modalPop 0.4s ease;
       position: relative;
-      overflow-y: auto;            /* CHO PHÉP CUỘN */
-      scrollbar-width: thin;
+      overflow-y: auto;
     }
 
     @keyframes modalPop {
@@ -208,47 +207,13 @@
       gap: 15px;
     }
 
-    /* Confirm Modal */
-    #confirmModal .modal-content {
-      max-width: min(95vw, 520px);
-      max-height: 90vh;
-    }
+    .confirm-icon { font-size: 3.8rem; margin-bottom: 15px; text-align: center; }
+    .confirm-title { font-size: 1.55rem; margin-bottom: 12px; text-align: center; }
+    .confirm-message { text-align: center; color: #475569; line-height: 1.65; margin-bottom: 30px; white-space: pre-line; font-size: 1.02rem; }
+    .confirm-buttons { display: flex; gap: 12px; }
+    .confirm-buttons button { flex: 1; padding: 14px; font-size: 1.05rem; border-radius: 12px; }
 
-    .confirm-icon {
-      font-size: 3.8rem;
-      margin-bottom: 15px;
-      text-align: center;
-    }
-    .confirm-title {
-      font-size: 1.55rem;
-      margin-bottom: 12px;
-      text-align: center;
-    }
-    .confirm-message {
-      text-align: center;
-      color: #475569;
-      line-height: 1.65;
-      margin-bottom: 30px;
-      white-space: pre-line;
-      font-size: 1.02rem;
-    }
-    .confirm-buttons {
-      display: flex;
-      gap: 12px;
-    }
-    .confirm-buttons button {
-      flex: 1;
-      padding: 14px;
-      font-size: 1.05rem;
-      border-radius: 12px;
-    }
-
-    /* Calendar Modal - rộng hơn một chút trên mobile */
-    .calendar-modal .modal-content {
-      width: min(95vw, 720px);
-      max-height: 95vh;
-      padding: 25px;
-    }
+    .calendar-modal .modal-content { width: min(95vw, 720px); max-height: 95vh; padding: 25px; }
 
     .toast {
       position: fixed;
@@ -265,43 +230,14 @@
       z-index: 3000;
     }
 
-    .money-input {
-      text-align: right;
-      font-weight: 600;
-    }
+    .money-input { text-align: right; font-weight: 600; }
 
-    .calendar {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-      margin-top: 10px;
-    }
-    .calendar-header {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      text-align: center;
-      font-weight: 600;
-      color: var(--primary-dark);
-      margin-bottom: 8px;
-    }
-    .day {
-      aspect-ratio: 1/1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      cursor: default;
-    }
+    .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 10px; }
+    .calendar-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: 600; color: var(--primary-dark); margin-bottom: 8px; }
+    .day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 0.95rem; cursor: default; }
     .day.other-month { color: #94a3b8; }
-    .day.booked {
-      background: #fee2e2;
-      color: #b91c1c;
-      font-weight: 700;
-    }
-    .day.today {
-      border: 2px solid var(--primary);
-    }
+    .day.booked { background: #fee2e2; color: #b91c1c; font-weight: 700; }
+    .day.today { border: 2px solid var(--primary); }
 
     .extra-fee-row {
       display: flex;
@@ -313,13 +249,13 @@
       border-radius: 12px;
     }
 
-    /* Tối ưu thêm cho mobile */
+    .note { font-size: 0.82rem; color: #64748b; margin-top: 4px; }
+
     @media (max-width: 600px) {
       body { padding: 10px; }
       .modal { padding: 10px; }
       .modal-content { padding: 20px; }
       h1 { font-size: 2.2rem; }
-      .btn { padding: 14px 20px; font-size: 1rem; }
     }
   </style>
 </head>
@@ -344,6 +280,17 @@
           <i class="fas fa-plus"></i> Thêm hợp đồng
         </button>
       </div>
+
+      <div style="display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap;">
+        <input type="text" id="searchInput" placeholder="🔎 Tìm tên khách, SĐT, biển số..." 
+               style="flex:1; min-width:280px; padding:14px; border:2px solid #e2e8f0; border-radius:12px;">
+        <select id="statusFilter" style="padding:14px; border:2px solid #e2e8f0; border-radius:12px; min-width:180px;">
+          <option value="all">Tất cả trạng thái</option>
+          <option value="Chưa nhận xe">Chưa nhận xe</option>
+          <option value="Đang thuê">Đang thuê</option>
+        </select>
+      </div>
+
       <table>
         <thead>
           <tr>
@@ -354,7 +301,6 @@
             <th>Ngày thuê</th>
             <th>Ngày trả</th>
             <th>Tổng tiền</th>
-            <th>Phụ phí</th>
             <th>Cọc</th>
             <th>Còn lại</th>
             <th>Trạng thái</th>
@@ -416,29 +362,22 @@
 
   <div class="fab" onclick="showAddContractModal()"><i class="fas fa-plus"></i></div>
 
-  <!-- Modal Thêm Hợp Đồng -->
+  <!-- Modal Thêm/Sửa Hợp Đồng -->
   <div id="contractModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Thêm hợp đồng thuê xe</h2>
+        <h2 id="contractModalTitle">Thêm hợp đồng thuê xe</h2>
         <span class="close" onclick="closeModal()">×</span>
       </div>
       <form id="contractForm">
-        <select id="carSelect" required>
-          <option value="">Chọn xe</option>
-        </select>
+        <input type="hidden" id="contractId">
+        <select id="carSelect" required><option value="">Chọn xe</option></select>
         <input type="text" id="customerName" placeholder="Tên khách thuê" required>
         <input type="tel" id="phone" placeholder="Số điện thoại" required>
 
         <div class="form-grid">
-          <div>
-            <label>Ngày thuê</label>
-            <input type="date" id="rentDate" required>
-          </div>
-          <div>
-            <label>Ngày trả</label>
-            <input type="date" id="returnDate" required>
-          </div>
+          <div><label>Ngày thuê</label><input type="date" id="rentDate" required></div>
+          <div><label>Ngày trả</label><input type="date" id="returnDate" required></div>
         </div>
 
         <input type="text" id="deposit" class="money-input" placeholder="Số tiền cọc (VNĐ)" required>
@@ -459,45 +398,39 @@
 
         <div style="margin-top: 25px; display: flex; gap: 15px;">
           <button type="button" class="btn btn-secondary" style="flex:1;" onclick="closeModal()">Huỷ</button>
-          <button type="submit" class="btn btn-primary" style="flex:1;">Lưu hợp đồng</button>
+          <button type="submit" class="btn btn-primary" style="flex:1;" id="contractSubmitBtn">Lưu hợp đồng</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Modal Thêm Xe -->
+  <!-- Modal Thêm/Sửa Xe -->
   <div id="carModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Thêm xe mới</h2>
+        <h2 id="carModalTitle">Thêm xe mới</h2>
         <span class="close" onclick="closeCarModal()">×</span>
       </div>
       <form id="carForm">
+        <input type="hidden" id="carId">
         <input type="text" id="carType" placeholder="Loại xe (ví dụ: Toyota Vios)" required>
         <input type="text" id="licensePlate" placeholder="Biển số xe" required>
         
         <div class="form-grid">
-          <div>
-            <label>Giá ngày thường (VNĐ/ngày)</label>
-            <input type="text" id="dailyPrice" class="money-input" placeholder="500 000" required>
-          </div>
-          <div>
-            <label>Giá cuối tuần (VNĐ/ngày)</label>
-            <input type="text" id="weekendPrice" class="money-input" placeholder="550 000" required>
-          </div>
+          <div><label>Giá ngày thường (VNĐ/ngày)</label><input type="text" id="dailyPrice" class="money-input" placeholder="500 000" required></div>
+          <div><label>Giá cuối tuần (VNĐ/ngày)</label><input type="text" id="weekendPrice" class="money-input" placeholder="550 000" required></div>
         </div>
-
         <input type="text" id="holidayPrice" class="money-input" placeholder="Giá ngày lễ/Tết (VNĐ/ngày)" required>
 
         <div style="margin-top: 25px; display: flex; gap: 15px;">
           <button type="button" class="btn btn-secondary" style="flex:1;" onclick="closeCarModal()">Huỷ</button>
-          <button type="submit" class="btn btn-success" style="flex:1;">Thêm xe</button>
+          <button type="submit" class="btn btn-success" style="flex:1;" id="carSubmitBtn">Thêm xe</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Modal Xác Nhận Chung -->
+  <!-- Modal Xác nhận thanh toán -->
   <div id="confirmModal" class="modal">
     <div class="modal-content">
       <div class="modal-header" style="justify-content: center; flex-direction: column; text-align: center;">
@@ -506,10 +439,24 @@
         <span class="close" onclick="closeConfirmModal()" style="position:absolute; top:15px; right:20px;">×</span>
       </div>
       <div id="confirmMessage" class="confirm-message"></div>
-      
       <div class="confirm-buttons">
         <button id="confirmCancelBtn" class="btn btn-warning">Chưa thu đủ</button>
         <button id="confirmOkBtn" class="btn btn-success">Đã thu đủ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Xác nhận đơn giản -->
+  <div id="simpleConfirmModal" class="modal">
+    <div class="modal-content" style="max-width: 480px;">
+      <div class="modal-header" style="justify-content: center; text-align: center;">
+        <h2 id="simpleConfirmTitle">Xác nhận</h2>
+        <span class="close" onclick="closeSimpleConfirmModal()">×</span>
+      </div>
+      <div id="simpleConfirmMessage" style="text-align:center; color:#475569; margin:20px 0; font-size:1.05rem; line-height:1.6;"></div>
+      <div style="display:flex; gap:12px;">
+        <button onclick="closeSimpleConfirmModal()" class="btn btn-secondary" style="flex:1;">Hủy bỏ</button>
+        <button id="simpleConfirmOkBtn" class="btn btn-danger" style="flex:1;">Xác nhận</button>
       </div>
     </div>
   </div>
@@ -532,9 +479,7 @@
       <div id="calendarGrid" class="calendar"></div>
       <div style="margin-top:15px; font-size:0.9rem; color:#64748b;">
         <span style="background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:4px;">Đang bận</span>
-        <span style="margin-left:15px;">Ngày rảnh: không tô màu</span>
       </div>
-
       <div style="margin-top: 25px; text-align: center;">
         <button onclick="closeScheduleModal()" class="btn btn-secondary" style="min-width: 120px;">Đóng</button>
       </div>
@@ -548,66 +493,29 @@
   </div>
 
   <script>
-    // ==================== CẤU HÌNH ====================
     const MASTER_KEY = "$2a$10$w8HuZEOH5lKslhwqq1vyc.pW/hNhvuAzCkMse5cgH4R9cX.n27ISO";
     const BIN_ID = "69cbd91436566621a866f521";
 
     let cars = [], contracts = [];
-    let holidays = [
-      "2026-01-01", "2026-04-26",
-      "2026-04-30", "2026-05-01", "2026-09-02"
-    ];
+    let holidays = ["2026-01-01", "2026-04-26", "2026-04-30", "2026-05-01", "2026-09-02"];
 
     let currentScheduleCarId = null;
     let currentMonth = new Date().getMonth();
     let currentYear = new Date().getFullYear();
 
     let currentConfirmCallback = null;
+    let currentSimpleConfirmCallback = null;
 
-    function showConfirm(title, message, icon, callback) {
-      document.getElementById('confirmTitle').textContent = title;
-      document.getElementById('confirmMessage').innerHTML = message;
-      document.getElementById('confirmIcon').innerHTML = icon;
-      currentConfirmCallback = callback;
-      document.getElementById('confirmModal').style.display = 'flex';
-    }
+    let currentSearch = '';
+    let currentStatusFilter = 'all';
 
-    function closeConfirmModal() {
-      document.getElementById('confirmModal').style.display = 'none';
-    }
-
-    // ====================== LOAD & SAVE ======================
-    async function loadData() {
-      try {
-        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-          headers: { 'X-Master-Key': MASTER_KEY }
-        });
-        const json = await res.json();
-        const data = json.record || json;
-        cars = Array.isArray(data.cars) ? data.cars : [];
-        contracts = Array.isArray(data.contracts) ? data.contracts : [];
-      } catch (e) {
-        console.error("Lỗi load dữ liệu:", e);
-      }
-    }
-
-    async function saveData() {
-      try {
-        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'X-Master-Key': MASTER_KEY },
-          body: JSON.stringify({ cars, contracts })
-        });
-      } catch (e) { console.error("Lỗi lưu dữ liệu:", e); }
-    }
-
-    // ====================== HELPER ======================
     function formatMoney(num) {
       return Number(num || 0).toLocaleString('vi-VN').replace(/,/g, ' ');
     }
 
     function parseMoney(str) {
-      return parseInt(str.replace(/\s/g, '')) || 0;
+      if (!str) return 0;
+      return parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
     }
 
     function formatDate(dateStr) {
@@ -623,6 +531,28 @@
       setTimeout(() => toast.style.display = 'none', 4000);
     }
 
+    async function loadData() {
+      try {
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+          headers: { 'X-Master-Key': MASTER_KEY }
+        });
+        const json = await res.json();
+        const data = json.record || json;
+        cars = Array.isArray(data.cars) ? data.cars : [];
+        contracts = Array.isArray(data.contracts) ? data.contracts : [];
+      } catch (e) { console.error("Lỗi load:", e); }
+    }
+
+    async function saveData() {
+      try {
+        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'X-Master-Key': MASTER_KEY },
+          body: JSON.stringify({ cars, contracts })
+        });
+      } catch (e) { console.error("Lỗi save:", e); }
+    }
+
     function getCarById(id) { return cars.find(c => c.id === id); }
     function getCarByPlate(plate) { return cars.find(c => c.plate === plate); }
 
@@ -630,17 +560,12 @@
       const newStart = new Date(rentDate);
       const newEnd = new Date(returnDate);
       return contracts.some(c => 
-        c.plate === plate && 
-        c.id !== excludeId && 
-        c.status !== "Đã hoàn tất" &&
+        c.plate === plate && c.id !== excludeId && c.status !== "Đã hoàn tất" &&
         newStart <= new Date(c.returnDate) && newEnd >= new Date(c.rentDate)
       );
     }
 
-    function isHoliday(d) {
-      return holidays.includes(d);
-    }
-
+    function isHoliday(d) { return holidays.includes(d); }
     function getDayType(d) {
       const day = new Date(d).getDay();
       return (day === 0 || day === 6) ? "weekend" : "normal";
@@ -649,23 +574,12 @@
     function calculateRentalTotal(contract) {
       const car = getCarByPlate(contract.plate);
       if (!car) return 0;
-
       let total = 0;
       let cur = new Date(contract.rentDate);
       const end = new Date(contract.returnDate);
-
       while (cur <= end) {
         const ds = cur.toISOString().split('T')[0];
-
-        let price;
-        if (isHoliday(ds)) {
-          price = car.holiday;
-        } else if (getDayType(ds) === "weekend") {
-          price = car.weekend;
-        } else {
-          price = car.daily;
-        }
-
+        let price = isHoliday(ds) ? car.holiday : (getDayType(ds) === "weekend" ? car.weekend : car.daily);
         total += price;
         cur.setDate(cur.getDate() + 1);
       }
@@ -688,98 +602,141 @@
       return Math.ceil((new Date(ret) - new Date(rent)) / 86400000) + 1;
     }
 
-    // ====================== XÁC NHẬN ======================
-    function confirmReceive(id) {
+    function showConfirm(title, message, icon, callback) {
+      document.getElementById('confirmTitle').textContent = title;
+      document.getElementById('confirmMessage').innerHTML = message;
+      document.getElementById('confirmIcon').innerHTML = icon;
+      currentConfirmCallback = callback;
+      document.getElementById('confirmModal').style.display = 'flex';
+    }
+    function closeConfirmModal() { document.getElementById('confirmModal').style.display = 'none'; }
+
+    function showSimpleConfirm(title, message, callback) {
+      document.getElementById('simpleConfirmTitle').textContent = title;
+      document.getElementById('simpleConfirmMessage').innerHTML = message;
+      currentSimpleConfirmCallback = callback;
+      document.getElementById('simpleConfirmModal').style.display = 'flex';
+    }
+    function closeSimpleConfirmModal() { document.getElementById('simpleConfirmModal').style.display = 'none'; }
+
+    function editContract(id) {
       const contract = contracts.find(c => c.id === id);
       if (!contract) return;
 
+      document.getElementById('contractModalTitle').textContent = "Sửa hợp đồng thuê xe";
+      document.getElementById('contractSubmitBtn').textContent = "Cập nhật hợp đồng";
+      document.getElementById('contractId').value = contract.id;
+
+      const sel = document.getElementById('carSelect');
+      sel.innerHTML = '<option value="">Chọn xe</option>';
+      cars.forEach(car => {
+        const opt = document.createElement('option');
+        opt.value = car.id;
+        opt.textContent = `${car.type} - ${car.plate}`;
+        if (car.plate === contract.plate) opt.selected = true;
+        sel.appendChild(opt);
+      });
+
+      document.getElementById('customerName').value = contract.customer || '';
+      document.getElementById('phone').value = contract.phone || '';
+      document.getElementById('rentDate').value = contract.rentDate || '';
+      document.getElementById('returnDate').value = contract.returnDate || '';
+      document.getElementById('deposit').value = formatMoney(contract.deposit || 0).replace(/\s/g, '');
+      document.getElementById('status').value = contract.status || 'Chưa nhận xe';
+
+      const extraList = document.getElementById('extraFeesList');
+      extraList.innerHTML = '';
+      (contract.extraFees || []).forEach(fee => {
+        const row = document.createElement('div');
+        row.className = 'extra-fee-row';
+        row.innerHTML = `
+          <select class="fee-type" style="flex:2;">
+            <option value="Phí sạc xe/xăng" ${fee.type==='Phí sạc xe/xăng'?'selected':''}>Phí sạc xe/xăng</option>
+            <option value="Phí vệ sinh xe" ${fee.type==='Phí vệ sinh xe'?'selected':''}>Phí vệ sinh xe</option>
+            <option value="Phí phạt trễ giờ" ${fee.type==='Phí phạt trễ giờ'?'selected':''}>Phí phạt trễ giờ</option>
+            <option value="Phí hao mòn" ${fee.type==='Phí hao mòn'?'selected':''}>Phí hao mòn</option>
+            <option value="Phí khác" ${fee.type==='Phí khác'?'selected':''}>Phí khác</option>
+          </select>
+          <input type="text" class="fee-amount money-input" value="${formatMoney(fee.amount||0).replace(/\s/g,'')}" style="flex:2;">
+          <button type="button" onclick="this.parentElement.remove()" class="btn btn-danger" style="padding:8px 12px;">Xóa</button>
+        `;
+        extraList.appendChild(row);
+      });
+
+      document.getElementById('contractModal').style.display = 'flex';
+    }
+
+    function deleteContract(id) {
+      showSimpleConfirm("Hủy hợp đồng", "Bạn có chắc muốn hủy hợp đồng này?<br><strong>Hành động này không thể hoàn tác.</strong>", () => {
+        contracts = contracts.filter(c => c.id !== id);
+        renderAll();
+        saveData();
+        showToast("Hợp đồng đã bị hủy.");
+      });
+    }
+
+    function confirmReceive(id) {
+      const contract = contracts.find(c => c.id === id);
+      if (!contract) return;
       const rental = calculateRentalTotal(contract);
       const extra = calculateExtraTotal(contract);
       const total = rental + extra;
       const remaining = total - (contract.deposit || 0);
       const days = calculateDays(contract.rentDate, contract.returnDate);
 
-      const message = `Khách hàng: ${contract.customer}\n` +
-        `SĐT: ${contract.phone}\n` +
-        `Xe: ${contract.carType} - ${contract.plate}\n` +
-        `Thời gian: ${formatDate(contract.rentDate)} → ${formatDate(contract.returnDate)} (${days} ngày)\n\n` +
-        `Tổng tiền: ${formatMoney(total)} ₫\n` +
-        `Đã cọc: ${formatMoney(contract.deposit || 0)} ₫\n` +
-        `Còn phải thu: ${formatMoney(remaining)} ₫\n\n` +
-        `Vui lòng chọn trạng thái thanh toán:`;
+      const message = `Khách hàng: ${contract.customer}\nSĐT: ${contract.phone}\nXe: ${contract.carType} - ${contract.plate}\nThời gian: ${formatDate(contract.rentDate)} → ${formatDate(contract.returnDate)} (${days} ngày)\n\nTổng tiền: ${formatMoney(total)} ₫\nĐã cọc: ${formatMoney(contract.deposit || 0)} ₫\nCòn phải thu: ${formatMoney(remaining)} ₫\n\nVui lòng chọn trạng thái thanh toán:`;
 
-      showConfirm(
-        "Xác nhận nhận xe",
-        message,
-        "🚗",
-        (isPaidFull) => {
-          contract.status = "Đang thuê";
-          contract.fullPaymentReceived = isPaidFull;
-
-          if (isPaidFull) {
-            showToast("Đã nhận xe và thu đủ tiền!");
-          } else {
-            showToast(`Đã nhận xe. Còn phải thu: ${formatMoney(remaining)} ₫`);
-          }
-
-          renderAll();
-          saveData();
-        }
-      );
+      showConfirm("Xác nhận nhận xe", message, "🚗", (isPaidFull) => {
+        contract.status = "Đang thuê";
+        contract.fullPaymentReceived = isPaidFull;
+        renderAll();
+        saveData();
+        showToast(isPaidFull ? "Đã nhận xe và thu đủ tiền!" : `Đã nhận xe. Còn phải thu: ${formatMoney(remaining)} ₫`);
+      });
     }
 
     function confirmReturn(id) {
-      showConfirm(
-        "Xác nhận trả xe",
-        "Bạn chắc chắn khách đã trả xe và muốn hoàn tất hợp đồng này?",
-        "🔄",
-        () => {
-          contracts.find(c => c.id === id).status = "Đã hoàn tất";
-          renderAll();
-          saveData();
-          showToast("Hợp đồng đã hoàn tất!");
-        }
-      );
+      showConfirm("Xác nhận trả xe", "Bạn chắc chắn khách đã trả xe và muốn hoàn tất hợp đồng này?", "🔄", () => {
+        contracts.find(c => c.id === id).status = "Đã hoàn tất";
+        renderAll();
+        saveData();
+        showToast("Hợp đồng đã hoàn tất!");
+      });
     }
 
-    function cancelContract(id) {
-      showConfirm(
-        "Hủy hợp đồng",
-        "Bạn có chắc muốn hủy hợp đồng này?\n\nHành động này không thể hoàn tác.",
-        "⚠️",
-        () => {
-          contracts = contracts.filter(c => c.id !== id);
-          renderAll();
-          saveData();
-          showToast("Hợp đồng đã bị hủy.");
-        }
-      );
+    function editCar(id) {
+      const car = cars.find(c => c.id === id);
+      if (!car) return;
+      document.getElementById('carModalTitle').textContent = "Sửa thông tin xe";
+      document.getElementById('carSubmitBtn').textContent = "Cập nhật xe";
+      document.getElementById('carId').value = car.id;
+
+      document.getElementById('carType').value = car.type || '';
+      document.getElementById('licensePlate').value = car.plate || '';
+      document.getElementById('dailyPrice').value = formatMoney(car.daily || 0).replace(/\s/g,'');
+      document.getElementById('weekendPrice').value = formatMoney(car.weekend || 0).replace(/\s/g,'');
+      document.getElementById('holidayPrice').value = formatMoney(car.holiday || 0).replace(/\s/g,'');
+
+      document.getElementById('carModal').style.display = 'flex';
     }
 
     function deleteCar(id) {
-      showConfirm(
-        "Xóa xe",
-        "Bạn có chắc muốn xóa xe này?\n\nChỉ xóa được khi xe không có hợp đồng nào.",
-        "🗑️",
-        () => {
-          if (contracts.some(c => cars.find(v => v.id === id)?.plate === c.plate)) {
-            alert("Không thể xóa xe đang có hợp đồng!");
-            return;
-          }
-          cars = cars.filter(c => c.id !== id);
-          renderAll();
-          saveData();
-          showToast("Xe đã được xóa.");
+      showSimpleConfirm("Xóa xe", "Bạn có chắc muốn xóa xe này?<br><strong>Chỉ xóa được khi xe không có hợp đồng nào.</strong>", () => {
+        if (contracts.some(c => cars.find(v => v.id === id)?.plate === c.plate)) {
+          alert("Không thể xóa xe đang có hợp đồng!");
+          return;
         }
-      );
+        cars = cars.filter(c => c.id !== id);
+        renderAll();
+        saveData();
+        showToast("Xe đã được xóa.");
+      });
     }
 
-    // ====================== CALENDAR ======================
     function renderCalendar(carId) {
       currentScheduleCarId = carId;
       const booked = new Set();
       const carPlate = cars.find(c => c.id === carId)?.plate;
-
       contracts.forEach(con => {
         if (con.plate === carPlate && con.status !== "Đã hoàn tất") {
           let d = new Date(con.rentDate);
@@ -837,24 +794,10 @@
       document.getElementById('scheduleModal').style.display = 'flex';
       renderCalendar(id);
     }
+    function prevMonth() { currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; } renderCalendar(currentScheduleCarId); }
+    function nextMonth() { currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; } renderCalendar(currentScheduleCarId); }
+    function closeScheduleModal() { document.getElementById('scheduleModal').style.display = 'none'; }
 
-    function prevMonth() {
-      currentMonth--;
-      if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-      renderCalendar(currentScheduleCarId);
-    }
-
-    function nextMonth() {
-      currentMonth++;
-      if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-      renderCalendar(currentScheduleCarId);
-    }
-
-    function closeScheduleModal() {
-      document.getElementById('scheduleModal').style.display = 'none';
-    }
-
-    // ====================== PHỤ PHÍ ======================
     function addExtraFeeField() {
       const container = document.getElementById('extraFeesList');
       const row = document.createElement('div');
@@ -884,19 +827,51 @@
       e.target.value = formatted;
     }
 
-    // ====================== RENDER ======================
     function renderActiveContracts() {
       const tbody = document.getElementById('activeContractBody');
       tbody.innerHTML = '';
-      contracts.filter(c => c.status !== "Đã hoàn tất").forEach(contract => {
-        const rental = calculateRentalTotal(contract);
+
+      let filtered = contracts.filter(c => c.status !== "Đã hoàn tất");
+
+      if (currentSearch) {
+        const term = currentSearch.toLowerCase();
+        filtered = filtered.filter(c =>
+          (c.customer || '').toLowerCase().includes(term) ||
+          (c.phone || '').includes(term) ||
+          (c.plate || '').toLowerCase().includes(term)
+        );
+      }
+
+      if (currentStatusFilter !== 'all') {
+        filtered = filtered.filter(c => c.status === currentStatusFilter);
+      }
+
+      filtered.forEach(contract => {
+        const totalMoney = calculateTotal(contract);
         const extra = calculateExtraTotal(contract);
         const remain = calculateRemaining(contract);
         const days = calculateDays(contract.rentDate, contract.returnDate);
 
-        const action = contract.status === "Chưa nhận xe" 
-          ? `<button onclick="confirmReceive(${contract.id})" class="btn btn-success" style="padding:8px 16px;font-size:0.9rem;">Nhận xe</button>`
-          : (contract.status === "Đang thuê" ? `<button onclick="confirmReturn(${contract.id})" class="btn btn-info" style="padding:8px 16px;font-size:0.9rem;">Đã trả xe</button>` : '');
+        let statusHTML = `<span class="status ${contract.status.toLowerCase().replace(/ /g,'-')}">${contract.status}</span>`;
+        if (contract.status === "Đang thuê" && contract.fullPaymentReceived) {
+          statusHTML = `<span class="status dang-thue-paid">Đang thuê (đã thu đủ)</span>`;
+        }
+
+        let totalHTML = `
+          <strong style="color:#16a34a;">${formatMoney(totalMoney)} ₫</strong>
+          <small>(${days} ngày)</small>
+        `;
+
+        if (extra > 0) {
+          totalHTML += `<div class="note">+ Phụ phí: ${formatMoney(extra)} ₫</div>`;
+        }
+
+        const actionHTML = `
+          <button onclick="editContract(${contract.id})" class="btn btn-edit" style="padding:8px 12px;font-size:0.85rem;">Sửa</button>
+          ${contract.status === "Chưa nhận xe" ? `<button onclick="confirmReceive(${contract.id})" class="btn btn-success" style="padding:8px 12px;font-size:0.85rem;">Nhận xe</button>` : ''}
+          ${contract.status === "Đang thuê" ? `<button onclick="confirmReturn(${contract.id})" class="btn btn-info" style="padding:8px 12px;font-size:0.85rem;">Đã trả xe</button>` : ''}
+          <button onclick="deleteContract(${contract.id})" class="btn btn-danger" style="padding:8px 12px;font-size:0.85rem;">Hủy</button>
+        `;
 
         const remainHTML = remain === 0 
           ? `0 ₫ <small style="color:#16a34a;">(Đã thu đủ)</small>` 
@@ -904,18 +879,17 @@
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><strong>${contract.customer}</strong></td>
-          <td>${contract.phone}</td>
-          <td>${contract.carType}</td>
-          <td><strong>${contract.plate}</strong></td>
+          <td><strong>${contract.customer || ''}</strong></td>
+          <td>${contract.phone || ''}</td>
+          <td>${contract.carType || ''}</td>
+          <td><strong>${contract.plate || ''}</strong></td>
           <td>${formatDate(contract.rentDate)}</td>
           <td>${formatDate(contract.returnDate)}</td>
-          <td style="color:#16a34a;font-weight:700;">${formatMoney(rental)} ₫ <small>(${days} ngày)</small></td>
-          <td style="color:#ea580c;font-weight:600;">${formatMoney(extra)} ₫</td>
+          <td>${totalHTML}</td>
           <td style="color:#16a34a;font-weight:600;">${formatMoney(contract.deposit||0)} ₫</td>
           <td style="color:${remain===0?'#16a34a':'#ea580c'};font-weight:600;">${remainHTML}</td>
-          <td><span class="status ${contract.status.toLowerCase().replace(/ /g,'-')}">${contract.status}</span></td>
-          <td style="display:flex; gap:6px;">${action}<button onclick="cancelContract(${contract.id})" class="btn btn-danger" style="padding:8px 14px;font-size:0.9rem;">Hủy</button></td>
+          <td>${statusHTML}</td>
+          <td style="display:flex; gap:6px; flex-wrap:wrap;">${actionHTML}</td>
         `;
         tbody.appendChild(tr);
       });
@@ -937,7 +911,10 @@
           <td>${formatMoney(car.weekend)} ₫</td>
           <td>${formatMoney(car.holiday)} ₫</td>
           <td><button onclick="showCarSchedule(${car.id})" class="btn btn-info" style="padding:8px 16px;font-size:0.9rem;">📅 Xem lịch</button></td>
-          <td><button onclick="deleteCar(${car.id})" class="btn btn-danger"><i class="fas fa-trash"></i></button></td>
+          <td style="display:flex; gap:6px;">
+            <button onclick="editCar(${car.id})" class="btn btn-edit" style="padding:8px 12px;"><i class="fas fa-edit"></i></button>
+            <button onclick="deleteCar(${car.id})" class="btn btn-danger" style="padding:8px 12px;"><i class="fas fa-trash"></i></button>
+          </td>
         `;
         tbody.appendChild(tr);
       });
@@ -952,9 +929,9 @@
         totalRevenue += total;
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><strong>${contract.customer}</strong></td>
-          <td>${contract.carType}</td>
-          <td><strong>${contract.plate}</strong></td>
+          <td><strong>${contract.customer || ''}</strong></td>
+          <td>${contract.carType || ''}</td>
+          <td><strong>${contract.plate || ''}</strong></td>
           <td>${formatDate(contract.rentDate)} → ${formatDate(contract.returnDate)}</td>
           <td style="color:#16a34a;font-weight:700;">${formatMoney(total)} ₫</td>
         `;
@@ -969,7 +946,6 @@
       renderCompletedContracts();
     }
 
-    // ====================== TAB & MODAL ======================
     function switchTab(tab) {
       document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===tab));
       document.getElementById('tab0').style.display = tab===0 ? 'block' : 'none';
@@ -978,8 +954,12 @@
     }
 
     function showAddContractModal() {
-      document.getElementById('contractModal').style.display = 'flex';
+      document.getElementById('contractModalTitle').textContent = "Thêm hợp đồng thuê xe";
+      document.getElementById('contractSubmitBtn').textContent = "Lưu hợp đồng";
+      document.getElementById('contractId').value = '';
+      document.getElementById('contractForm').reset();
       document.getElementById('extraFeesList').innerHTML = '';
+
       const sel = document.getElementById('carSelect');
       sel.innerHTML = '<option value="">Chọn xe</option>';
       cars.forEach(car => {
@@ -988,32 +968,31 @@
         opt.textContent = `${car.type} - ${car.plate}`;
         sel.appendChild(opt);
       });
+      document.getElementById('contractModal').style.display = 'flex';
     }
 
-    function closeModal() { 
-      document.getElementById('contractModal').style.display = 'none';
-      document.getElementById('contractForm').reset();
-    }
-
-    function showAddCarModal() { 
-      document.getElementById('carModal').style.display = 'flex'; 
-    }
-
-    function closeCarModal() { 
-      document.getElementById('carModal').style.display = 'none';
+    function closeModal() { document.getElementById('contractModal').style.display = 'none'; }
+    function showAddCarModal() {
+      document.getElementById('carModalTitle').textContent = "Thêm xe mới";
+      document.getElementById('carSubmitBtn').textContent = "Thêm xe";
+      document.getElementById('carId').value = '';
       document.getElementById('carForm').reset();
+      document.getElementById('carModal').style.display = 'flex';
     }
+    function closeCarModal() { document.getElementById('carModal').style.display = 'none'; }
 
-    // ====================== FORM SUBMIT ======================
+    // Form submit
     document.getElementById('contractForm').addEventListener('submit', e => {
       e.preventDefault();
       const carId = parseInt(document.getElementById('carSelect').value);
-      const rent = document.getElementById('rentDate').value;
-      const ret = document.getElementById('returnDate').value;
+      const contractId = document.getElementById('contractId').value ? parseInt(document.getElementById('contractId').value) : null;
       const car = getCarById(carId);
       if (!car) return alert("Vui lòng chọn xe!");
 
-      if (isDateOverlap(rent, ret, car.plate)) 
+      const rent = document.getElementById('rentDate').value;
+      const ret = document.getElementById('returnDate').value;
+
+      if (!contractId && isDateOverlap(rent, ret, car.plate)) 
         return alert("Xe đã có lịch trong khoảng thời gian này!");
 
       const extraFees = [];
@@ -1022,46 +1001,87 @@
         if (amt > 0) extraFees.push({ type: row.querySelector('.fee-type').value, amount: amt });
       });
 
-      contracts.push({
-        id: Date.now(),
-        customer: document.getElementById('customerName').value,
-        phone: document.getElementById('phone').value,
-        carType: car.type,
-        plate: car.plate,
-        rentDate: rent,
-        returnDate: ret,
-        deposit: parseMoney(document.getElementById('deposit').value),
-        extraFees,
-        status: document.getElementById('status').value,
-        fullPaymentReceived: false
-      });
+      if (contractId) {
+        const contract = contracts.find(c => c.id === contractId);
+        if (contract) {
+          contract.customer = document.getElementById('customerName').value;
+          contract.phone = document.getElementById('phone').value;
+          contract.carType = car.type;
+          contract.plate = car.plate;
+          contract.rentDate = rent;
+          contract.returnDate = ret;
+          contract.deposit = parseMoney(document.getElementById('deposit').value);
+          contract.extraFees = extraFees;
+          contract.status = document.getElementById('status').value;
+        }
+        showToast('Hợp đồng đã được cập nhật!');
+      } else {
+        contracts.push({
+          id: Date.now(),
+          customer: document.getElementById('customerName').value,
+          phone: document.getElementById('phone').value,
+          carType: car.type,
+          plate: car.plate,
+          rentDate: rent,
+          returnDate: ret,
+          deposit: parseMoney(document.getElementById('deposit').value),
+          extraFees,
+          status: document.getElementById('status').value,
+          fullPaymentReceived: false
+        });
+        showToast('Hợp đồng đã được thêm thành công!');
+      }
 
       renderAll();
       closeModal();
-      showToast('Hợp đồng đã được thêm thành công!');
       saveData();
     });
 
     document.getElementById('carForm').addEventListener('submit', e => {
       e.preventDefault();
-      cars.push({
-        id: Date.now(),
-        type: document.getElementById('carType').value,
-        plate: document.getElementById('licensePlate').value,
-        daily: parseMoney(document.getElementById('dailyPrice').value),
-        weekend: parseMoney(document.getElementById('weekendPrice').value),
-        holiday: parseMoney(document.getElementById('holidayPrice').value)
-      });
+      const carId = document.getElementById('carId').value ? parseInt(document.getElementById('carId').value) : null;
+      if (carId) {
+        const car = cars.find(c => c.id === carId);
+        if (car) {
+          car.type = document.getElementById('carType').value;
+          car.plate = document.getElementById('licensePlate').value;
+          car.daily = parseMoney(document.getElementById('dailyPrice').value);
+          car.weekend = parseMoney(document.getElementById('weekendPrice').value);
+          car.holiday = parseMoney(document.getElementById('holidayPrice').value);
+        }
+        showToast('Thông tin xe đã được cập nhật!');
+      } else {
+        cars.push({
+          id: Date.now(),
+          type: document.getElementById('carType').value,
+          plate: document.getElementById('licensePlate').value,
+          daily: parseMoney(document.getElementById('dailyPrice').value),
+          weekend: parseMoney(document.getElementById('weekendPrice').value),
+          holiday: parseMoney(document.getElementById('holidayPrice').value)
+        });
+        showToast('Xe mới đã được thêm!');
+      }
       renderAll();
       closeCarModal();
-      showToast('Xe mới đã được thêm!');
       saveData();
     });
 
-    // ====================== KHỞI ĐỘNG ======================
     window.onload = async () => {
       await loadData();
       renderAll();
+
+      const searchInput = document.getElementById('searchInput');
+      const statusFilter = document.getElementById('statusFilter');
+
+      searchInput.addEventListener('input', () => {
+        currentSearch = searchInput.value.trim();
+        renderActiveContracts();
+      });
+
+      statusFilter.addEventListener('change', () => {
+        currentStatusFilter = statusFilter.value;
+        renderActiveContracts();
+      });
 
       ['dailyPrice','weekendPrice','holidayPrice','deposit'].forEach(id => {
         const el = document.getElementById(id);
@@ -1072,13 +1092,16 @@
         if (currentConfirmCallback) currentConfirmCallback(false);
         closeConfirmModal();
       });
-
       document.getElementById('confirmOkBtn').addEventListener('click', () => {
         if (currentConfirmCallback) currentConfirmCallback(true);
         closeConfirmModal();
       });
+      document.getElementById('simpleConfirmOkBtn').addEventListener('click', () => {
+        if (currentSimpleConfirmCallback) currentSimpleConfirmCallback();
+        closeSimpleConfirmModal();
+      });
 
-      console.log("🚀 CarRent đã khởi động thành công - Modal đã được tối ưu cuộn & mobile");
+      console.log("🚀 CarRent hoàn tất - Phụ phí đã chuyển thành ghi chú trong cột Tổng tiền");
     };
   </script>
 </body>
