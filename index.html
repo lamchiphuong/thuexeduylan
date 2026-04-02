@@ -71,7 +71,7 @@
 
     table {
       width: 100%;
-      min-width: 1200px;
+      min-width: 900px; /* buộc cuộn ngang trên mobile */
       border-collapse: collapse;
     }
     th, td {
@@ -154,7 +154,7 @@
       background: white;
       border-radius: 24px;
       width: 100%;
-      max-width: 580px;
+      max-width: 560px;
       max-height: 92vh;
       padding: 25px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.2);
@@ -197,7 +197,7 @@
       padding: 14px;
       border: 2px solid #e2e8f0;
       border-radius: 12px;
-      margin-bottom: 8px;
+      margin-bottom: 15px;
       font-size: 1rem;
     }
     input:focus, select:focus {
@@ -206,22 +206,75 @@
       box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
     }
 
-    label {
-      display: block;
-      font-weight: 600;
-      color: #475569;
-      margin-bottom: 6px;
-      font-size: 0.95rem;
-    }
-
     .form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 15px;
     }
 
-    .money-group {
-      margin-bottom: 18px;
+    .confirm-icon { font-size: 3.5rem; margin-bottom: 15px; text-align: center; }
+    .confirm-title { font-size: 1.5rem; margin-bottom: 12px; text-align: center; }
+    .confirm-message { text-align: center; color: #475569; line-height: 1.6; margin-bottom: 25px; font-size: 1rem; }
+    .confirm-buttons { display: flex; gap: 12px; }
+    .confirm-buttons button { flex: 1; padding: 14px; font-size: 1.05rem; border-radius: 12px; }
+
+    .calendar-modal .modal-content { max-width: 720px; }
+
+    .toast {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      background: #333;
+      color: white;
+      padding: 14px 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+      display: none;
+      align-items: center;
+      gap: 8px;
+      z-index: 3000;
+      max-width: 90%;
+    }
+
+    .money-input {
+      text-align: right;
+      font-weight: 600;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-top: 10px;
+    }
+    .calendar-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      font-weight: 600;
+      color: var(--primary-dark);
+      margin-bottom: 8px;
+    }
+    .day {
+      aspect-ratio: 1/1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-size: 0.92rem;
+    }
+    .day.other-month { color: #94a3b8; }
+    .day.booked { background: #fee2e2; color: #b91c1c; font-weight: 700; }
+    .day.today { border: 2px solid var(--primary); }
+
+    .extra-fee-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 12px;
     }
 
     .note {
@@ -230,27 +283,10 @@
       margin-top: 3px;
     }
 
-    /* Toast - Giữ nguyên style gốc */
-    #toast {
-      display: none;
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #333;
-      color: white;
-      padding: 14px 24px;
-      border-radius: 12px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-      align-items: center;
-      gap: 10px;
-      z-index: 3000;
-      font-size: 1rem;
-    }
-
     @media (max-width: 600px) {
       body { padding: 10px; }
       h1 { font-size: 2.2rem; }
+      .btn { padding: 11px 16px; font-size: 0.92rem; }
       th, td { padding: 12px 8px; font-size: 0.9rem; }
       .modal-content { padding: 20px; }
     }
@@ -310,7 +346,7 @@
       </div>
     </div>
 
-    <!-- Tab 1 và Tab 2 giữ nguyên -->
+    <!-- Tab 1 và Tab 2 giữ nguyên như trước (để code đầy đủ) -->
     <div id="tab1" class="card" style="display: none;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h2><i class="fas fa-car-side"></i> Danh sách xe</h2>
@@ -352,7 +388,7 @@
               <th>Khách hàng</th>
               <th>Loại xe</th>
               <th>Biển số</th>
-              <th>Nhận xe → Trả xe</th>
+              <th>Ngày thuê → Trả</th>
               <th>Doanh thu</th>
             </tr>
           </thead>
@@ -364,6 +400,7 @@
 
   <div class="fab" onclick="showAddContractModal()"><i class="fas fa-plus"></i></div>
 
+  <!-- Các modal giữ nguyên (contract, car, confirm, simpleConfirm, schedule, toast) -->
   <!-- Modal Thêm/Sửa Hợp Đồng -->
   <div id="contractModal" class="modal">
     <div class="modal-content">
@@ -378,41 +415,11 @@
         <input type="tel" id="phone" placeholder="Số điện thoại" required>
 
         <div class="form-grid">
-          <div>
-            <label>Ngày bắt đầu thuê</label>
-            <input type="date" id="rentDate" required>
-          </div>
-          <div>
-            <label>Thời gian nhận xe <small style="color:#64748b;">(24h)</small></label>
-            <input type="time" id="rentTime" value="08:00">
-          </div>
-          <div>
-            <label>Ngày trả xe</label>
-            <input type="date" id="returnDate" required>
-          </div>
-          <div>
-            <label>Thời gian trả xe <small style="color:#64748b;">(24h)</small></label>
-            <input type="time" id="returnTime" value="18:00">
-          </div>
+          <div><label>Ngày thuê</label><input type="date" id="rentDate" required></div>
+          <div><label>Ngày trả</label><input type="date" id="returnDate" required></div>
         </div>
 
-        <div style="margin-bottom: 20px;">
-          <label>Nhận xe vào</label>
-          <select id="rentDayType">
-            <option value="cungngay" selected>Cùng ngày</option>
-            <option value="homtruoc">Tối hôm trước</option>
-          </select>
-        </div>
-
-        <div class="money-group">
-          <label>Số tiền cọc (VNĐ)</label>
-          <input type="text" id="deposit" class="money-input" inputmode="numeric" pattern="[0-9\s]*" placeholder="Ví dụ: 500000" required>
-        </div>
-
-        <div class="money-group">
-          <label>Giảm giá (VNĐ) <small style="color:#16a34a;">(nếu có)</small></label>
-          <input type="text" id="discount" class="money-input" inputmode="numeric" pattern="[0-9\s]*" placeholder="0" value="0">
-        </div>
+        <input type="text" id="deposit" class="money-input" inputmode="numeric" pattern="[0-9\s]*" placeholder="Số tiền cọc (VNĐ)" required>
 
         <div style="margin: 20px 0 10px 0;">
           <h4 style="color: #64748b; margin-bottom: 8px;">Phụ phí phát sinh (nếu có)</h4>
@@ -452,10 +459,7 @@
           <div><label>Giá ngày thường (VNĐ/ngày)</label><input type="text" id="dailyPrice" class="money-input" inputmode="numeric" pattern="[0-9\s]*" placeholder="500 000" required></div>
           <div><label>Giá cuối tuần (VNĐ/ngày)</label><input type="text" id="weekendPrice" class="money-input" inputmode="numeric" pattern="[0-9\s]*" placeholder="550 000" required></div>
         </div>
-        <div style="margin-bottom: 15px;">
-          <label>Giá ngày lễ/Tết (VNĐ/ngày)</label>
-          <input type="text" id="holidayPrice" class="money-input" inputmode="numeric" pattern="[0-9\s]*" placeholder="600 000" required>
-        </div>
+        <input type="text" id="holidayPrice" class="money-input" inputmode="numeric" pattern="[0-9\s]*" placeholder="Giá ngày lễ/Tết (VNĐ/ngày)" required>
 
         <div style="margin-top: 25px; display: flex; gap: 15px;">
           <button type="button" class="btn btn-secondary" style="flex:1;" onclick="closeCarModal()">Huỷ</button>
@@ -465,7 +469,7 @@
     </div>
   </div>
 
-  <!-- Modal xác nhận và lịch giữ nguyên từ code gốc -->
+  <!-- Modal Xác nhận thanh toán -->
   <div id="confirmModal" class="modal">
     <div class="modal-content">
       <div class="modal-header" style="justify-content: center; flex-direction: column; text-align: center;">
@@ -481,6 +485,7 @@
     </div>
   </div>
 
+  <!-- Modal Xác nhận đơn giản -->
   <div id="simpleConfirmModal" class="modal">
     <div class="modal-content" style="max-width: 480px;">
       <div class="modal-header" style="justify-content: center; text-align: center;">
@@ -495,6 +500,7 @@
     </div>
   </div>
 
+  <!-- Modal Lịch Xe -->
   <div id="scheduleModal" class="modal calendar-modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -519,7 +525,7 @@
     </div>
   </div>
 
-  <!-- Toast - Đúng như code gốc của cậu -->
+  <!-- Toast -->
   <div id="toast" class="toast">
     <i class="fas fa-check-circle"></i>
     <span id="toastMessage"></span>
@@ -626,7 +632,7 @@
     }
 
     function calculateTotal(c) {
-      return calculateRentalTotal(c) + calculateExtraTotal(c) - (c.discount || 0);
+      return calculateRentalTotal(c) + calculateExtraTotal(c);
     }
 
     function calculateRemaining(c) {
@@ -678,11 +684,7 @@
       document.getElementById('phone').value = contract.phone || '';
       document.getElementById('rentDate').value = contract.rentDate || '';
       document.getElementById('returnDate').value = contract.returnDate || '';
-      document.getElementById('rentTime').value = contract.rentTime || '08:00';
-      document.getElementById('returnTime').value = contract.returnTime || '18:00';
-      document.getElementById('rentDayType').value = contract.rentDayType || 'cungngay';
       document.getElementById('deposit').value = formatMoney(contract.deposit || 0).replace(/\s/g, '');
-      document.getElementById('discount').value = formatMoney(contract.discount || 0).replace(/\s/g, '');
       document.getElementById('status').value = contract.status || 'Chưa nhận xe';
 
       const extraList = document.getElementById('extraFeesList');
@@ -721,12 +723,11 @@
       if (!contract) return;
       const rental = calculateRentalTotal(contract);
       const extra = calculateExtraTotal(contract);
-      const discountAmt = contract.discount || 0;
-      const total = rental + extra - discountAmt;
+      const total = rental + extra;
       const remaining = total - (contract.deposit || 0);
       const days = calculateDays(contract.rentDate, contract.returnDate);
 
-      const message = `Khách hàng: ${contract.customer}<br>SĐT: ${contract.phone}<br>Xe: ${contract.carType} - ${contract.plate}<br>Nhận: ${formatDate(contract.rentDate)} ${contract.rentTime || ''}<br>Trả: ${formatDate(contract.returnDate)} ${contract.returnTime || ''} (${days} ngày)<br><br>Tổng tiền trước giảm: ${formatMoney(rental + extra)} ₫<br>Giảm giá: ${formatMoney(discountAmt)} ₫<br>Tổng tiền: ${formatMoney(total)} ₫<br>Đã cọc: ${formatMoney(contract.deposit || 0)} ₫<br>Còn phải thu: ${formatMoney(remaining)} ₫`;
+      const message = `Khách hàng: ${contract.customer}\n <br> SĐT: ${contract.phone}\n <br> Xe: ${contract.carType} - ${contract.plate}\n <br> Thời gian: ${formatDate(contract.rentDate)} → ${formatDate(contract.returnDate)} (${days} ngày)\n\n <br> Tổng tiền: ${formatMoney(total)} ₫\nĐã cọc: ${formatMoney(contract.deposit || 0)} ₫\n <br> Còn phải thu: ${formatMoney(remaining)} ₫\n\n <br> Vui lòng chọn trạng thái thanh toán:`;
 
       showConfirm("Xác nhận nhận xe", message, "🚗", (isPaidFull) => {
         contract.status = "Đang thuê";
@@ -892,7 +893,6 @@
       filtered.forEach(contract => {
         const totalMoney = calculateTotal(contract);
         const extra = calculateExtraTotal(contract);
-        const discountAmt = contract.discount || 0;
         const remain = calculateRemaining(contract);
         const days = calculateDays(contract.rentDate, contract.returnDate);
 
@@ -905,14 +905,9 @@
           <strong style="color:#16a34a;">${formatMoney(totalMoney)} ₫</strong>
           <small>(${days} ngày)</small>
         `;
-        if (extra > 0) totalHTML += `<div class="note">+ Phụ phí: ${formatMoney(extra)} ₫</div>`;
-        if (discountAmt > 0) totalHTML += `<div class="note">- Giảm giá: ${formatMoney(discountAmt)} ₫</div>`;
-
-        const rentNote = contract.rentDayType === "homtruoc" 
-          ? `<small class="note">Nhận: ${contract.rentTime} (tối hôm trước)</small>` 
-          : `<small class="note">Nhận: ${contract.rentTime}</small>`;
-
-        const returnNote = `<small class="note">Trả: ${contract.returnTime}</small>`;
+        if (extra > 0) {
+          totalHTML += `<div class="note">+ Phụ phí: ${formatMoney(extra)} ₫</div>`;
+        }
 
         const actionHTML = `
           <button onclick="editContract(${contract.id})" class="btn btn-edit" style="padding:8px 12px;font-size:0.85rem;">Sửa</button>
@@ -931,8 +926,8 @@
           <td>${contract.phone || ''}</td>
           <td>${contract.carType || ''}</td>
           <td><strong>${contract.plate || ''}</strong></td>
-          <td>${formatDate(contract.rentDate)}<br>${rentNote}</td>
-          <td>${formatDate(contract.returnDate)}<br>${returnNote}</td>
+          <td>${formatDate(contract.rentDate)}</td>
+          <td>${formatDate(contract.returnDate)}</td>
           <td>${totalHTML}</td>
           <td style="color:#16a34a;font-weight:600;">${formatMoney(contract.deposit||0)} ₫</td>
           <td style="color:${remain===0?'#16a34a':'#ea580c'};font-weight:600;">${remainHTML}</td>
@@ -980,7 +975,7 @@
           <td><strong>${contract.customer || ''}</strong></td>
           <td>${contract.carType || ''}</td>
           <td><strong>${contract.plate || ''}</strong></td>
-          <td>${formatDate(contract.rentDate)} ${contract.rentTime || ''} → ${formatDate(contract.returnDate)} ${contract.returnTime || ''}</td>
+          <td>${formatDate(contract.rentDate)} → ${formatDate(contract.returnDate)}</td>
           <td style="color:#16a34a;font-weight:700;">${formatMoney(total)} ₫</td>
         `;
         tbody.appendChild(tr);
@@ -1007,11 +1002,6 @@
       document.getElementById('contractId').value = '';
       document.getElementById('contractForm').reset();
       document.getElementById('extraFeesList').innerHTML = '';
-
-      document.getElementById('rentTime').value = '08:00';
-      document.getElementById('returnTime').value = '18:00';
-      document.getElementById('rentDayType').value = 'cungngay';
-      document.getElementById('discount').value = '0';
 
       const sel = document.getElementById('carSelect');
       sel.innerHTML = '<option value="">Chọn xe</option>';
@@ -1044,10 +1034,6 @@
 
       const rent = document.getElementById('rentDate').value;
       const ret = document.getElementById('returnDate').value;
-      const rentTime = document.getElementById('rentTime').value;
-      const returnTime = document.getElementById('returnTime').value;
-      const rentDayType = document.getElementById('rentDayType').value;
-      const discount = parseMoney(document.getElementById('discount').value);
 
       if (!contractId && isDateOverlap(rent, ret, car.plate)) 
         return alert("Xe đã có lịch trong khoảng thời gian này!");
@@ -1067,11 +1053,7 @@
           contract.plate = car.plate;
           contract.rentDate = rent;
           contract.returnDate = ret;
-          contract.rentTime = rentTime;
-          contract.returnTime = returnTime;
-          contract.rentDayType = rentDayType;
           contract.deposit = parseMoney(document.getElementById('deposit').value);
-          contract.discount = discount;
           contract.extraFees = extraFees;
           contract.status = document.getElementById('status').value;
         }
@@ -1085,11 +1067,7 @@
           plate: car.plate,
           rentDate: rent,
           returnDate: ret,
-          rentTime: rentTime,
-          returnTime: returnTime,
-          rentDayType: rentDayType,
           deposit: parseMoney(document.getElementById('deposit').value),
-          discount: discount,
           extraFees,
           status: document.getElementById('status').value,
           fullPaymentReceived: false
@@ -1149,11 +1127,13 @@
         renderActiveContracts();
       });
 
-      // Format tiền khi blur
-      const moneyFields = ['dailyPrice','weekendPrice','holidayPrice','deposit','discount'];
+      // Chỉ format khi blur (mất focus) để tránh làm mất bàn phím trên mobile
+      const moneyFields = ['dailyPrice','weekendPrice','holidayPrice','deposit'];
       moneyFields.forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.addEventListener('blur', formatPriceInput);
+        if (el) {
+          el.addEventListener('blur', formatPriceInput);
+        }
       });
 
       document.getElementById('confirmCancelBtn').addEventListener('click', () => {
@@ -1169,7 +1149,7 @@
         closeSimpleConfirmModal();
       });
 
-      console.log("🚀 CarRent đã khôi phục toast và toast style gốc");
+      console.log("🚀 CarRent đã tối ưu hoàn toàn cho mobile - Nhập tiền ổn định");
     };
   </script>
 </body>
