@@ -260,9 +260,24 @@
       justify-content: center;
       border-radius: 8px;
       font-size: 0.92rem;
+      transition: all 0.2s ease;
     }
+    .day:hover { transform: scale(1.05); }
     .day.other-month { color: #94a3b8; }
-    .day.booked { background: #fee2e2; color: #b91c1c; font-weight: 700; }
+    .day.booked { 
+      background: #fee2e2; 
+      color: #b91c1c; 
+      font-weight: 700; 
+      cursor: pointer;
+      position: relative;
+    }
+    .day.booked::after {
+      content: "📋";
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      font-size: 10px;
+    }
     .day.today { border: 2px solid var(--primary); }
 
     .extra-fee-row {
@@ -280,7 +295,7 @@
       font-weight: 600;
     }
 
-    /* Toast - Giữ nguyên style gốc của new THUÊ XE.html */
+    /* Toast */
     #toast {
       display: none;
       position: fixed;
@@ -387,15 +402,50 @@
       </div>
     </div>
 
-    <!-- Tab 2 -->
+    <!-- Tab 2 - Lịch sử & Doanh thu (ĐÃ CÓ TÍNH NĂNG THEO THÁNG) -->
     <div id="tab2" class="card" style="display: none;">
-      <h2><i class="fas fa-history"></i> Lịch sử hợp đồng đã hoàn tất</h2>
+      <h2><i class="fas fa-history"></i> Lịch sử hợp đồng & Doanh thu theo tháng</h2>
+      
+      <!-- Bộ lọc theo tháng/năm -->
+      <div style="margin: 20px 0; padding: 20px; background: #f8fafc; border-radius: 16px; display: flex; gap: 15px; flex-wrap: wrap; align-items: end;">
+        <div>
+          <label style="display:block; font-weight:600; margin-bottom:5px; color:#475569;">Năm</label>
+          <select id="revenueYearFilter" onchange="filterCompletedContracts()" 
+                  style="padding:12px 16px; border:2px solid #e2e8f0; border-radius:12px; min-width:140px;">
+          </select>
+        </div>
+        <div>
+          <label style="display:block; font-weight:600; margin-bottom:5px; color:#475569;">Tháng</label>
+          <select id="revenueMonthFilter" onchange="filterCompletedContracts()" 
+                  style="padding:12px 16px; border:2px solid #e2e8f0; border-radius:12px; min-width:160px;">
+            <option value="">Tất cả tháng</option>
+            <option value="1">Tháng 1</option>
+            <option value="2">Tháng 2</option>
+            <option value="3">Tháng 3</option>
+            <option value="4">Tháng 4</option>
+            <option value="5">Tháng 5</option>
+            <option value="6">Tháng 6</option>
+            <option value="7">Tháng 7</option>
+            <option value="8">Tháng 8</option>
+            <option value="9">Tháng 9</option>
+            <option value="10">Tháng 10</option>
+            <option value="11">Tháng 11</option>
+            <option value="12">Tháng 12</option>
+          </select>
+        </div>
+        <button onclick="resetRevenueFilter()" class="btn btn-secondary" style="height: 48px;">
+          <i class="fas fa-sync"></i> Xem tất cả
+        </button>
+      </div>
+
+      <!-- Thẻ tổng doanh thu -->
       <div style="background:#f0fdf4; border-radius:16px; padding:20px; margin-bottom:25px; display:flex; justify-content:space-between; align-items:center;">
         <div>
-          <span style="font-size:1.05rem; color:#166534;">Tổng doanh thu từ tất cả cuốc đã hoàn tất</span>
+          <span id="revenueTitle" style="font-size:1.05rem; color:#166534;">Tổng doanh thu từ tất cả cuốc đã hoàn tất</span>
           <h1 id="totalRevenue" style="color:#16a34a; font-size:2.5rem; margin:8px 0 0 0;">0 ₫</h1>
         </div>
       </div>
+
       <div class="table-container">
         <table>
           <thead>
@@ -547,7 +597,7 @@
     </div>
   </div>
 
-  <!-- Modal Lịch xe -->
+  <!-- Modal Lịch xe (ĐÃ CÓ TÍNH NĂNG CLICK NGÀY BẬN) -->
   <div id="scheduleModal" class="modal calendar-modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -565,9 +615,24 @@
       <div id="calendarGrid" class="calendar"></div>
       <div style="margin-top:15px; font-size:0.9rem; color:#64748b;">
         <span style="background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:4px;">Đang bận</span>
+        <span style="margin-left:15px; color:#64748b;">• Nhấn vào ngày đỏ để xem chi tiết hợp đồng</span>
       </div>
       <div style="margin-top: 25px; text-align: center;">
         <button onclick="closeScheduleModal()" class="btn btn-secondary" style="min-width: 120px;">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal mới: Chi tiết hợp đồng khi click ngày bận trên lịch -->
+  <div id="contractDetailModal" class="modal">
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-header">
+        <h2>Thông tin hợp đồng ngày <span id="detailDate" style="color:var(--primary);"></span></h2>
+        <span class="close" onclick="closeContractDetailModal()">×</span>
+      </div>
+      <div id="detailContent" style="padding: 10px 0; max-height: 60vh; overflow-y:auto;"></div>
+      <div style="margin-top: 20px; text-align: center;">
+        <button onclick="closeContractDetailModal()" class="btn btn-secondary" style="min-width: 160px;">Đóng</button>
       </div>
     </div>
   </div>
@@ -595,6 +660,10 @@
 
     let currentSearch = '';
     let currentStatusFilter = 'all';
+
+    // Biến mới cho lọc doanh thu theo tháng/năm
+    let currentRevenueYear = '';
+    let currentRevenueMonth = '';
 
     // ====================== HELPER ======================
     function formatMoney(num) {
@@ -828,7 +897,7 @@
       });
     }
 
-    // ====================== LỊCH XE ======================
+    // ====================== LỊCH XE + XEM HỢP ĐỒNG TRÊN NGÀY BẬN (TÍNH NĂNG MỚI) ======================
     function renderCalendar(carId) {
       currentScheduleCarId = carId;
       const booked = new Set();
@@ -871,7 +940,10 @@
         div.className = 'day';
         div.textContent = day;
         if (dateStr === today) div.classList.add('today');
-        if (booked.has(dateStr)) div.classList.add('booked');
+        if (booked.has(dateStr)) {
+          div.classList.add('booked');
+          div.onclick = () => showContractOnDate(dateStr);
+        }
         grid.appendChild(div);
       }
 
@@ -884,14 +956,64 @@
       }
     }
 
+    // TÍNH NĂNG MỚI: Click ngày bận → hiện thông tin hợp đồng
+    function showContractOnDate(dateStr) {
+      const car = cars.find(c => c.id === currentScheduleCarId);
+      if (!car) return;
+
+      const dayContracts = contracts.filter(c => 
+        c.plate === car.plate && 
+        c.status !== "Đã hoàn tất" &&
+        new Date(dateStr) >= new Date(c.rentDate) && 
+        new Date(dateStr) <= new Date(c.returnDate)
+      );
+
+      if (dayContracts.length === 0) return;
+
+      document.getElementById('detailDate').textContent = formatDate(dateStr);
+
+      let html = `<p style="color:#64748b; margin-bottom:15px;">Có ${dayContracts.length} hợp đồng thuê xe trong ngày này:</p>`;
+      dayContracts.forEach(con => {
+        const total = calculateTotal(con);
+        html += `
+          <div style="border:2px solid #fee2e2; background:#fff1f2; border-radius:16px; padding:18px; margin-bottom:18px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <strong style="font-size:1.1rem;">${con.customer}</strong>
+              <span class="status ${con.status.toLowerCase().replace(/ /g,'-')}">${con.status}</span>
+            </div>
+            <div style="font-size:0.95rem; line-height:1.5;">
+              📱 <strong>${con.phone}</strong><br>
+              🚗 ${con.carType} - ${con.plate}<br>
+              📅 Thuê: ${formatDate(con.rentDate)} ${con.rentTime || ''} → Trả: ${formatDate(con.returnDate)} ${con.returnTime || ''}<br>
+              💰 Tổng tiền: <strong style="color:#16a34a;">${formatMoney(total)} ₫</strong>
+            </div>
+          </div>`;
+      });
+
+      document.getElementById('detailContent').innerHTML = html;
+      document.getElementById('contractDetailModal').style.display = 'flex';
+    }
+
+    function closeContractDetailModal() {
+      document.getElementById('contractDetailModal').style.display = 'none';
+    }
+
     function showCarSchedule(id) {
       currentMonth = new Date().getMonth();
       currentYear = new Date().getFullYear();
       document.getElementById('scheduleModal').style.display = 'flex';
       renderCalendar(id);
     }
-    function prevMonth() { currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; } renderCalendar(currentScheduleCarId); }
-    function nextMonth() { currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; } renderCalendar(currentScheduleCarId); }
+    function prevMonth() { 
+      currentMonth--; 
+      if (currentMonth < 0) { currentMonth = 11; currentYear--; } 
+      renderCalendar(currentScheduleCarId); 
+    }
+    function nextMonth() { 
+      currentMonth++; 
+      if (currentMonth > 11) { currentMonth = 0; currentYear++; } 
+      renderCalendar(currentScheduleCarId); 
+    }
     function closeScheduleModal() { document.getElementById('scheduleModal').style.display = 'none'; }
 
     function addExtraFeeField() {
@@ -1021,13 +1143,85 @@
       });
     }
 
+    // ====================== TÍNH NĂNG MỚI: LỊCH SỬ & DOANH THU THEO THÁNG ======================
+    function populateRevenueFilters() {
+      const years = new Set();
+      contracts.forEach(c => {
+        if (c.status === "Đã hoàn tất" && c.rentDate) {
+          const y = new Date(c.rentDate).getFullYear();
+          years.add(y);
+        }
+      });
+
+      const yearSel = document.getElementById('revenueYearFilter');
+      yearSel.innerHTML = '<option value="">Tất cả năm</option>';
+      
+      const sortedYears = Array.from(years).sort((a, b) => b - a);
+      sortedYears.forEach(y => {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = y;
+        yearSel.appendChild(opt);
+      });
+
+      // Mặc định năm hiện tại nếu có dữ liệu
+      const currY = new Date().getFullYear();
+      if (sortedYears.includes(currY)) {
+        yearSel.value = currY;
+        currentRevenueYear = currY.toString();
+      }
+    }
+
+    function filterCompletedContracts() {
+      currentRevenueYear = document.getElementById('revenueYearFilter').value;
+      currentRevenueMonth = document.getElementById('revenueMonthFilter').value;
+      renderCompletedContracts();
+    }
+
+    function resetRevenueFilter() {
+      document.getElementById('revenueYearFilter').value = '';
+      document.getElementById('revenueMonthFilter').value = '';
+      currentRevenueYear = '';
+      currentRevenueMonth = '';
+      renderCompletedContracts();
+    }
+
     function renderCompletedContracts() {
       const tbody = document.getElementById('completedContractBody');
       tbody.innerHTML = '';
       let totalRevenue = 0;
-      contracts.filter(c => c.status === "Đã hoàn tất").forEach(contract => {
+
+      let filteredContracts = contracts.filter(c => c.status === "Đã hoàn tất");
+
+      // Lọc theo năm
+      if (currentRevenueYear) {
+        filteredContracts = filteredContracts.filter(c => {
+          return new Date(c.rentDate).getFullYear().toString() === currentRevenueYear;
+        });
+      }
+
+      // Lọc theo tháng
+      if (currentRevenueMonth) {
+        filteredContracts = filteredContracts.filter(c => {
+          return (new Date(c.rentDate).getMonth() + 1).toString() === currentRevenueMonth;
+        });
+      }
+
+      // Cập nhật tiêu đề tổng doanh thu
+      let titleText = "Tổng doanh thu từ tất cả cuốc đã hoàn tất";
+      if (currentRevenueYear && currentRevenueMonth) {
+        titleText = `Doanh thu tháng ${currentRevenueMonth} / ${currentRevenueYear}`;
+      } else if (currentRevenueYear) {
+        titleText = `Doanh thu năm ${currentRevenueYear}`;
+      } else if (currentRevenueMonth) {
+        titleText = `Doanh thu tháng ${currentRevenueMonth}`;
+      }
+      document.getElementById('revenueTitle').textContent = titleText;
+
+      filteredContracts.forEach(contract => {
         const total = calculateTotal(contract);
         totalRevenue += total;
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><strong>${contract.customer || ''}</strong></td>
@@ -1038,6 +1232,7 @@
         `;
         tbody.appendChild(tr);
       });
+
       document.getElementById('totalRevenue').textContent = formatMoney(totalRevenue) + ' ₫';
     }
 
@@ -1189,6 +1384,9 @@
       await loadData();
       renderAll();
 
+      // Khởi tạo bộ lọc doanh thu theo tháng
+      populateRevenueFilters();
+
       const searchInput = document.getElementById('searchInput');
       const statusFilter = document.getElementById('statusFilter');
 
@@ -1222,7 +1420,7 @@
         closeSimpleConfirmModal();
       });
 
-      console.log("🚀 CarRent đã được sửa hoàn chỉnh - Lịch xe và tất cả modal hoạt động tốt");
+      console.log("🚀 CarRent đã được nâng cấp hoàn chỉnh - Đã thêm: Doanh thu theo tháng + Click ngày bận xem hợp đồng");
     };
   </script>
 </body>
