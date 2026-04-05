@@ -769,32 +769,54 @@
       return calculateRentalTotal(c) + calculateExtraTotal(c) - (c.discount || 0);
     }
 
-    function getContractRevenue(contract) {
-      if (contract.revenue !== undefined) return contract.revenue;
-      return calculateTotal(contract);
-    }
-
-    function getFilteredCompletedContracts() {
-      let filtered = contracts.filter(c => c.status === "Đã hoàn tất");
-
-      if (currentRevenueYear) {
-        filtered = filtered.filter(c => new Date(c.rentDate).getFullYear().toString() === currentRevenueYear);
-      }
-      if (currentRevenueMonth) {
-        filtered = filtered.filter(c => (new Date(c.rentDate).getMonth() + 1).toString() === currentRevenueMonth);
-      }
-      if (currentRevenueCar) {
-        filtered = filtered.filter(c => c.plate === currentRevenueCar);
-      }
-      return filtered;
+    function calculateDays(rent, ret) {
+      return Math.ceil((new Date(ret) - new Date(rent)) / 86400000) + 1;
     }
 
     function calculateRemaining(c) {
       return (c.fullPaymentReceived || c.status === "Đã hoàn tất") ? 0 : calculateTotal(c) - (c.deposit || 0);
     }
 
-    function calculateDays(rent, ret) {
-      return Math.ceil((new Date(ret) - new Date(rent)) / 86400000) + 1;
+    // ====================== FREEZE TOÀN BỘ LỊCH SỬ ======================
+    function freezeContract(contract) {
+      if (contract.frozenData) return;
+
+      contract.frozenData = {
+        customer: contract.customer,
+        phone: contract.phone,
+        carType: contract.carType,
+        plate: contract.plate,
+        rentDate: contract.rentDate,
+        returnDate: contract.returnDate,
+        rentTime: contract.rentTime,
+        returnTime: contract.returnTime,
+        rentDayType: contract.rentDayType,
+        deposit: contract.deposit,
+        discount: contract.discount || 0,
+        extraFees: JSON.parse(JSON.stringify(contract.extraFees || [])),
+        rentalAmount: calculateRentalTotal(contract),
+        totalAmount: calculateTotal(contract)
+      };
+    }
+
+    function getCompletedDisplay(con) {
+      if (con.frozenData) return con.frozenData;
+      return {
+        customer: con.customer,
+        phone: con.phone,
+        carType: con.carType,
+        plate: con.plate,
+        rentDate: con.rentDate,
+        returnDate: con.returnDate,
+        rentTime: con.rentTime,
+        returnTime: con.returnTime,
+        rentDayType: con.rentDayType,
+        deposit: con.deposit,
+        discount: con.discount || 0,
+        extraFees: con.extraFees || [],
+        rentalAmount: calculateRentalTotal(con),
+        totalAmount: calculateTotal(con)
+      };
     }
 
     // ====================== XÁC NHẬN ======================
@@ -898,15 +920,15 @@
     }
 
     function confirmReturn(id) {
-      showConfirm("Xác nhận trả xe", "Bạn chắc chắn khách đã trả xe và muốn hoàn tất hợp đồng này?", "🔄", () => {
+      showConfirm("Xác nhận trả xe", "Bạn chắc chắn khách đã trả xe?<br><strong>Toàn bộ thông tin sẽ được ghi nhận vĩnh viễn.</strong>", "🔄", () => {
         const contract = contracts.find(c => c.id === id);
         if (contract) {
-          contract.revenue = calculateTotal(contract);
+          freezeContract(contract);
           contract.status = "Đã hoàn tất";
         }
         renderAll();
         saveData();
-        showToast("Hợp đồng đã hoàn tất! Doanh thu đã được ghi nhận cố định.");
+        showToast("Hợp đồng đã hoàn tất và được freeze vĩnh viễn!");
       });
     }
 
@@ -939,7 +961,7 @@
       });
     }
 
-    // ====================== LỊCH XE ======================
+    // ====================== LỊCH XE + XEM HỢP ĐỒNG TRONG NGÀY BẬN (ĐÃ SỬA) ======================
     function renderCalendar(carId) {
       currentScheduleCarId = carId;
       const booked = new Set();
@@ -1015,7 +1037,7 @@
 
       let html = `<p style="color:#64748b; margin-bottom:15px;">Có ${dayContracts.length} hợp đồng thuê xe trong ngày này:</p>`;
       dayContracts.forEach(con => {
-        const total = getContractRevenue(con);
+        const total = calculateTotal(con);   // Dùng calculateTotal cho hợp đồng đang xử lý
         html += `
           <div style="border:2px solid #fee2e2; background:#fff1f2; border-radius:16px; padding:18px; margin-bottom:18px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -1181,19 +1203,18 @@
       });
     }
 
+    // ====================== DOANH THU ======================
     function populateRevenueFilters() {
       const years = new Set();
       contracts.forEach(c => {
         if (c.status === "Đã hoàn tất" && c.rentDate) {
-          const y = new Date(c.rentDate).getFullYear();
-          years.add(y);
+          years.add(new Date(c.rentDate).getFullYear());
         }
       });
 
       const yearSel = document.getElementById('revenueYearFilter');
       yearSel.innerHTML = '<option value="">Tất cả năm</option>';
-      const sortedYears = Array.from(years).sort((a, b) => b - a);
-      sortedYears.forEach(y => {
+      Array.from(years).sort((a,b)=>b-a).forEach(y => {
         const opt = document.createElement('option');
         opt.value = y;
         opt.textContent = y;
@@ -1201,10 +1222,15 @@
       });
 
       const currY = new Date().getFullYear();
-      if (sortedYears.includes(currY)) {
+      const currM = (new Date().getMonth() + 1).toString();
+
+      if (years.has(currY)) {
         yearSel.value = currY;
         currentRevenueYear = currY.toString();
       }
+
+      document.getElementById('revenueMonthFilter').value = currM;
+      currentRevenueMonth = currM;
 
       const carSel = document.getElementById('revenueCarFilter');
       carSel.innerHTML = '<option value="">Tất cả xe</option>';
@@ -1214,6 +1240,8 @@
         opt.textContent = `${car.type} - ${car.plate}`;
         carSel.appendChild(opt);
       });
+
+      renderCompletedContracts();
     }
 
     function filterCompletedContracts() {
@@ -1238,43 +1266,37 @@
       tbody.innerHTML = '';
       let totalRevenue = 0;
 
-      const filteredContracts = getFilteredCompletedContracts();
+      let filtered = contracts.filter(c => c.status === "Đã hoàn tất");
+
+      if (currentRevenueYear) filtered = filtered.filter(c => new Date(c.rentDate).getFullYear().toString() === currentRevenueYear);
+      if (currentRevenueMonth) filtered = filtered.filter(c => (new Date(c.rentDate).getMonth() + 1).toString() === currentRevenueMonth);
+      if (currentRevenueCar) filtered = filtered.filter(c => c.plate === currentRevenueCar);
 
       let titleText = "Tổng doanh thu từ tất cả cuốc đã hoàn tất";
-      if (currentRevenueYear && currentRevenueMonth) {
-        titleText = `Doanh thu tháng ${currentRevenueMonth} / ${currentRevenueYear}`;
-      } else if (currentRevenueYear) {
-        titleText = `Doanh thu năm ${currentRevenueYear}`;
-      } else if (currentRevenueMonth) {
-        titleText = `Doanh thu tháng ${currentRevenueMonth}`;
-      }
+      if (currentRevenueYear && currentRevenueMonth) titleText = `Doanh thu tháng ${currentRevenueMonth} / ${currentRevenueYear}`;
       if (currentRevenueCar) {
         const selectedCar = cars.find(c => c.plate === currentRevenueCar);
-        const carDesc = selectedCar ? `${selectedCar.type} - ${selectedCar.plate}` : currentRevenueCar;
-        titleText += ` (${carDesc})`;
+        titleText += selectedCar ? ` (${selectedCar.type} - ${selectedCar.plate})` : '';
       }
       document.getElementById('revenueTitle').textContent = titleText;
 
-      filteredContracts.forEach(contract => {
-        const rental = calculateRentalTotal(contract);
-        const extra = calculateExtraTotal(contract);
-        const discountAmt = contract.discount || 0;
-        const total = getContractRevenue(contract);
-        totalRevenue += total;
+      filtered.forEach(contract => {
+        const d = getCompletedDisplay(contract);
+        totalRevenue += d.totalAmount;
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><strong>${contract.customer || ''}</strong></td>
-          <td>${contract.phone || ''}</td>
-          <td>${contract.carType || ''}</td>
-          <td><strong>${contract.plate || ''}</strong></td>
-          <td>${formatDate(contract.rentDate)} ${contract.rentTime || ''}</td>
-          <td>${formatDate(contract.returnDate)} ${contract.returnTime || ''}</td>
-          <td>${calculateDays(contract.rentDate, contract.returnDate)}</td>
-          <td style="text-align:right;">${formatMoney(rental)} ₫</td>
-          <td style="text-align:right;">${formatMoney(extra)} ₫</td>
-          <td style="text-align:right;">${formatMoney(discountAmt)} ₫</td>
-          <td style="color:#16a34a;font-weight:700;text-align:right;">${formatMoney(total)} ₫</td>
+          <td><strong>${d.customer || ''}</strong></td>
+          <td>${d.phone || ''}</td>
+          <td>${d.carType || ''}</td>
+          <td><strong>${d.plate || ''}</strong></td>
+          <td>${formatDate(d.rentDate)} ${d.rentTime || ''}</td>
+          <td>${formatDate(d.returnDate)} ${d.returnTime || ''}</td>
+          <td>${calculateDays(d.rentDate, d.returnDate)}</td>
+          <td style="text-align:right;">${formatMoney(d.rentalAmount)} ₫</td>
+          <td style="text-align:right;">${formatMoney(d.extraFees.reduce((s,f)=>s+(f.amount||0),0))} ₫</td>
+          <td style="text-align:right;">${formatMoney(d.discount)} ₫</td>
+          <td style="color:#16a34a;font-weight:700;text-align:right;">${formatMoney(d.totalAmount)} ₫</td>
         `;
         tbody.appendChild(tr);
       });
@@ -1284,7 +1306,7 @@
 
     // ====================== IN BÁO CÁO ======================
     function printRevenue() {
-      const filtered = getFilteredCompletedContracts();
+      const filtered = contracts.filter(c => c.status === "Đã hoàn tất");
       if (filtered.length === 0) {
         alert("Không có dữ liệu để in!");
         return;
@@ -1298,18 +1320,15 @@
           <style>
             body { font-family: Arial, sans-serif; padding: 30px; }
             h1 { color: #2563eb; text-align: center; }
-            h2 { text-align: center; color: #166534; }
             table { width: 100%; border-collapse: collapse; margin: 20px 0; }
             th, td { border: 1px solid #999; padding: 10px; text-align: left; }
             th { background: #2563eb; color: white; }
-            td { text-align: right; }
-            td:first-child, td:nth-child(2), td:nth-child(3), td:nth-child(4), td:nth-child(5), td:nth-child(6) { text-align: left; }
             .total { font-size: 1.5rem; color: #16a34a; font-weight: bold; text-align: right; margin: 30px 0; }
             .date { text-align: center; color: #64748b; margin-top: 50px; }
           </style>
         </head>
         <body>
-          <h1>BÁO CÁO DOANH THU TRÊN ỨNG DỤNG CARRENT</h1>
+          <h1>BÁO CÁO DOANH THU - ỨNG DỤNG CARRENT</h1>
           <h2>${document.getElementById('revenueTitle').textContent}</h2>
           <div class="total">Tổng doanh thu: ${document.getElementById('totalRevenue').textContent}</div>
           <table>
@@ -1332,25 +1351,20 @@
       `;
 
       filtered.forEach(con => {
-        const rental = calculateRentalTotal(con);
-        const extra = calculateExtraTotal(con);
-        const discountAmt = con.discount || 0;
-        const total = getContractRevenue(con);
-        const days = calculateDays(con.rentDate, con.returnDate);
-
+        const d = getCompletedDisplay(con);
         html += `
           <tr>
-            <td>${con.customer || ''}</td>
-            <td>${con.phone || ''}</td>
-            <td>${con.carType || ''}</td>
-            <td>${con.plate || ''}</td>
-            <td>${formatDate(con.rentDate)} ${con.rentTime || ''}</td>
-            <td>${formatDate(con.returnDate)} ${con.returnTime || ''}</td>
-            <td style="text-align:center;">${days}</td>
-            <td>${formatMoney(rental)} ₫</td>
-            <td>${formatMoney(extra)} ₫</td>
-            <td>${formatMoney(discountAmt)} ₫</td>
-            <td style="font-weight:bold;color:#16a34a;">${formatMoney(total)} ₫</td>
+            <td>${d.customer || ''}</td>
+            <td>${d.phone || ''}</td>
+            <td>${d.carType || ''}</td>
+            <td>${d.plate || ''}</td>
+            <td>${formatDate(d.rentDate)} ${d.rentTime || ''}</td>
+            <td>${formatDate(d.returnDate)} ${d.returnTime || ''}</td>
+            <td style="text-align:center;">${calculateDays(d.rentDate, d.returnDate)}</td>
+            <td>${formatMoney(d.rentalAmount)} ₫</td>
+            <td>${formatMoney(d.extraFees.reduce((s,f)=>s+(f.amount||0),0))} ₫</td>
+            <td>${formatMoney(d.discount)} ₫</td>
+            <td style="font-weight:bold;color:#16a34a;">${formatMoney(d.totalAmount)} ₫</td>
           </tr>`;
       });
 
@@ -1514,18 +1528,18 @@
     window.onload = async () => {
       await loadData();
 
-      // Freeze doanh thu cho hợp đồng cũ
+      // Freeze toàn bộ lịch sử hợp đồng cũ nếu chưa có
       let migrated = false;
       contracts.forEach(c => {
-        if (c.status === "Đã hoàn tất" && c.revenue === undefined) {
-          c.revenue = calculateTotal(c);
+        if (c.status === "Đã hoàn tất" && !c.frozenData) {
+          freezeContract(c);
           migrated = true;
         }
       });
       if (migrated) await saveData();
 
       renderAll();
-      populateRevenueFilters();
+      populateRevenueFilters();   // Mặc định tháng hiện tại
 
       const searchInput = document.getElementById('searchInput');
       const statusFilter = document.getElementById('statusFilter');
@@ -1559,7 +1573,7 @@
         closeSimpleConfirmModal();
       });
 
-      console.log("🚀 CarRent đã cập nhật - Đã bỏ nút Xuất Excel");
+      console.log("🚀 CarRent hoàn chỉnh - Đã khôi phục đầy đủ tính năng xem hợp đồng trong lịch");
     };
   </script>
 </body>
