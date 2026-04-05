@@ -483,6 +483,7 @@
 
   <div class="fab" onclick="showAddContractModal()"><i class="fas fa-plus"></i></div>
 
+  <!-- Các modal giữ nguyên như cũ (không thay đổi) -->
   <!-- Modal Thêm/Sửa Hợp Đồng -->
   <div id="contractModal" class="modal">
     <div class="modal-content">
@@ -961,7 +962,7 @@
       });
     }
 
-    // ====================== LỊCH XE + XEM HỢP ĐỒNG TRONG NGÀY BẬN (ĐÃ SỬA) ======================
+    // ====================== LỊCH XE ======================
     function renderCalendar(carId) {
       currentScheduleCarId = carId;
       const booked = new Set();
@@ -1037,7 +1038,7 @@
 
       let html = `<p style="color:#64748b; margin-bottom:15px;">Có ${dayContracts.length} hợp đồng thuê xe trong ngày này:</p>`;
       dayContracts.forEach(con => {
-        const total = calculateTotal(con);   // Dùng calculateTotal cho hợp đồng đang xử lý
+        const total = calculateTotal(con);
         html += `
           <div style="border:2px solid #fee2e2; background:#fff1f2; border-radius:16px; padding:18px; margin-bottom:18px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -1304,11 +1305,17 @@
       document.getElementById('totalRevenue').textContent = formatMoney(totalRevenue) + ' ₫';
     }
 
-    // ====================== IN BÁO CÁO ======================
+    // ====================== IN BÁO CÁO (ĐÃ SỬA) ======================
     function printRevenue() {
-      const filtered = contracts.filter(c => c.status === "Đã hoàn tất");
+      let filtered = contracts.filter(c => c.status === "Đã hoàn tất");
+
+      // Áp dụng đúng các filter hiện tại
+      if (currentRevenueYear) filtered = filtered.filter(c => new Date(c.rentDate).getFullYear().toString() === currentRevenueYear);
+      if (currentRevenueMonth) filtered = filtered.filter(c => (new Date(c.rentDate).getMonth() + 1).toString() === currentRevenueMonth);
+      if (currentRevenueCar) filtered = filtered.filter(c => c.plate === currentRevenueCar);
+
       if (filtered.length === 0) {
-        alert("Không có dữ liệu để in!");
+        alert("Không có dữ liệu để in theo bộ lọc hiện tại!");
         return;
       }
 
@@ -1320,15 +1327,16 @@
           <style>
             body { font-family: Arial, sans-serif; padding: 30px; }
             h1 { color: #2563eb; text-align: center; }
+            h2 { text-align: center; color: #475569; margin-bottom: 20px; }
             table { width: 100%; border-collapse: collapse; margin: 20px 0; }
             th, td { border: 1px solid #999; padding: 10px; text-align: left; }
             th { background: #2563eb; color: white; }
-            .total { font-size: 1.5rem; color: #16a34a; font-weight: bold; text-align: right; margin: 30px 0; }
-            .date { text-align: center; color: #64748b; margin-top: 50px; }
+            .total { font-size: 1.6rem; color: #16a34a; font-weight: bold; text-align: right; margin: 30px 0; }
+            .date { text-align: center; color: #64748b; margin-top: 60px; }
           </style>
         </head>
         <body>
-          <h1>BÁO CÁO DOANH THU - ỨNG DỤNG CARRENT</h1>
+          <h1>BÁO CÁO DOANH THU - CARRENT</h1>
           <h2>${document.getElementById('revenueTitle').textContent}</h2>
           <div class="total">Tổng doanh thu: ${document.getElementById('totalRevenue').textContent}</div>
           <table>
@@ -1361,10 +1369,10 @@
             <td>${formatDate(d.rentDate)} ${d.rentTime || ''}</td>
             <td>${formatDate(d.returnDate)} ${d.returnTime || ''}</td>
             <td style="text-align:center;">${calculateDays(d.rentDate, d.returnDate)}</td>
-            <td>${formatMoney(d.rentalAmount)} ₫</td>
-            <td>${formatMoney(d.extraFees.reduce((s,f)=>s+(f.amount||0),0))} ₫</td>
-            <td>${formatMoney(d.discount)} ₫</td>
-            <td style="font-weight:bold;color:#16a34a;">${formatMoney(d.totalAmount)} ₫</td>
+            <td style="text-align:right;">${formatMoney(d.rentalAmount)} ₫</td>
+            <td style="text-align:right;">${formatMoney(d.extraFees.reduce((s,f)=>s+(f.amount||0),0))} ₫</td>
+            <td style="text-align:right;">${formatMoney(d.discount)} ₫</td>
+            <td style="font-weight:bold;color:#16a34a;text-align:right;">${formatMoney(d.totalAmount)} ₫</td>
           </tr>`;
       });
 
@@ -1377,7 +1385,7 @@
 
       printWin.document.write(html);
       printWin.document.close();
-      setTimeout(() => printWin.print(), 500);
+      setTimeout(() => printWin.print(), 600);
     }
 
     function renderAll() {
@@ -1539,7 +1547,7 @@
       if (migrated) await saveData();
 
       renderAll();
-      populateRevenueFilters();   // Mặc định tháng hiện tại
+      populateRevenueFilters();
 
       const searchInput = document.getElementById('searchInput');
       const statusFilter = document.getElementById('statusFilter');
@@ -1573,7 +1581,7 @@
         closeSimpleConfirmModal();
       });
 
-      console.log("🚀 CarRent hoàn chỉnh - Đã khôi phục đầy đủ tính năng xem hợp đồng trong lịch");
+      console.log("🚀 CarRent hoàn chỉnh - In báo cáo đã sửa đúng filter theo xe!");
     };
   </script>
 </body>
