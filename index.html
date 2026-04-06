@@ -5,7 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CarRent - Quản Lý Thuê Xe</title>
   
+  <!-- Icon & PWA cho iOS -->
   <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
+
+  <!-- PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CarRent">
+
+  <!-- Inline Web App Manifest -->
+  <link rel="manifest" href="data:application/manifest+json,{
+    &quot;name&quot;:&quot;CarRent - Quản Lý Thuê Xe&quot;,
+    &quot;short_name&quot;:&quot;CarRent&quot;,
+    &quot;description&quot;:&quot;Quản lý thuê xe thông minh&quot;,
+    &quot;start_url&quot;:&quot;.&quot;,
+    &quot;display&quot;:&quot;standalone&quot;,
+    &quot;background_color&quot;:&quot;#f8fafc&quot;,
+    &quot;theme_color&quot;:&quot;#2563eb&quot;,
+    &quot;icons&quot;:[{
+      &quot;src&quot;:&quot;https://cdn-icons-png.flaticon.com/512/19006/19006139.png&quot;,
+      &quot;sizes&quot;:&quot;512x512&quot;,
+      &quot;type&quot;:&quot;image/png&quot;,
+      &quot;purpose&quot;:&quot;any maskable&quot;
+    }]
+  }">
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   
   <style>
@@ -24,6 +53,7 @@
       background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
       min-height: 100vh;
       padding: 15px;
+      padding-bottom: 110px;
     }
 
     .container { max-width: 1400px; margin: 0 auto; }
@@ -120,6 +150,7 @@
     .btn-edit { background: #8b5cf6; color: white; }
     .btn-secondary { background: #64748b; color: white; }
 
+    /* === NÚT HÀNH ĐỘNG DƯỚI CÙNG (ĐÃ CHỈNH SỬA) === */
     .fab {
       position: fixed;
       bottom: 25px;
@@ -136,6 +167,37 @@
       box-shadow: 0 8px 25px rgba(37,99,235,0.5);
       cursor: pointer;
       z-index: 1000;
+    }
+
+    .action-buttons {
+      position: fixed;
+      bottom: 25px;
+      right: 105px;           /* Đẩy sang trái để nằm ngang với FAB */
+      display: flex;
+      gap: 12px;
+      z-index: 999;
+    }
+
+    .action-btn {
+      width: 52px;
+      height: 52px;
+      background: white;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .action-btn:hover {
+      background: var(--primary);
+      color: white;
+      transform: scale(1.08);
     }
 
     .modal {
@@ -311,15 +373,40 @@
       font-size: 1rem;
     }
 
+    .version {
+      text-align: center;
+      margin-top: 50px;
+      color: var(--gray);
+      font-size: 0.85rem;
+      opacity: 0.75;
+    }
+
     @media (max-width: 600px) {
-      body { padding: 10px; }
+      body { padding: 10px; padding-bottom: 120px; }
       h1 { font-size: 2.2rem; }
-      th, td { padding: 12px 8px; font-size: 0.9rem; }
-      .modal-content { padding: 20px; }
+      
+      .fab {
+        width: 55px;
+        height: 55px;
+        bottom: 20px;
+        right: 20px;
+      }
+      
+      .action-buttons {
+        bottom: 20px;
+        right: 88px;
+        gap: 10px;
+      }
+      
+      .action-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 1.25rem;
+      }
     }
 
     @media print {
-      .tabs, .fab, header, .modal, #tab0, #tab1, .btn:not(.print-only) { display: none !important; }
+      .tabs, .fab, .action-buttons, header, .modal, #tab0, #tab1, .btn:not(.print-only) { display: none !important; }
       #tab2 { display: block !important; box-shadow: none; }
       .table-container { overflow: visible; }
     }
@@ -338,7 +425,7 @@
       <div class="tab" onclick="switchTab(2)">📊 Lịch sử & Doanh thu</div>
     </div>
 
-    <!-- Tab 0 -->
+    <!-- Tab 0: Hợp đồng đang xử lý -->
     <div id="tab0" class="card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
         <h2><i class="fas fa-list"></i> Danh sách hợp đồng đang xử lý</h2>
@@ -379,7 +466,7 @@
       </div>
     </div>
 
-    <!-- Tab 1 -->
+    <!-- Tab 1: Quản lý xe -->
     <div id="tab1" class="card" style="display: none;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h2><i class="fas fa-car-side"></i> Danh sách xe</h2>
@@ -406,7 +493,7 @@
       </div>
     </div>
 
-    <!-- Tab 2 -->
+    <!-- Tab 2: Lịch sử & Doanh thu -->
     <div id="tab2" class="card" style="display: none;">
       <h2><i class="fas fa-history"></i> Lịch sử hợp đồng & Doanh thu theo tháng / xe</h2>
       
@@ -481,9 +568,22 @@
     </div>
   </div>
 
+  <!-- FAB Thêm hợp đồng -->
   <div class="fab" onclick="showAddContractModal()"><i class="fas fa-plus"></i></div>
 
-  <!-- Các modal giữ nguyên như cũ (không thay đổi) -->
+  <!-- Nút Refresh & Home - nằm ngang bên trái FAB -->
+  <div class="action-buttons">
+    <div class="action-btn" onclick="refreshApp()" title="Làm mới trang">
+      <i class="fas fa-sync-alt"></i>
+    </div>
+    <div class="action-btn" onclick="goHome()" title="Về trang chính">
+      <i class="fas fa-home"></i>
+    </div>
+  </div>
+
+  <!-- Các modal và toast giữ nguyên như cũ -->
+  <!-- (Phần modal, script giữ nguyên hoàn toàn như file cũ của bạn) -->
+
   <!-- Modal Thêm/Sửa Hợp Đồng -->
   <div id="contractModal" class="modal">
     <div class="modal-content">
@@ -662,6 +762,11 @@
     <span id="toastMessage"></span>
   </div>
 
+  <!-- Version -->
+  <div class="version">
+    CarRent v1.2.3
+  </div>
+
   <script>
     // ==================== CẤU HÌNH ====================
     const MASTER_KEY = "$2a$10$w8HuZEOH5lKslhwqq1vyc.pW/hNhvuAzCkMse5cgH4R9cX.n27ISO";
@@ -778,10 +883,8 @@
       return (c.fullPaymentReceived || c.status === "Đã hoàn tất") ? 0 : calculateTotal(c) - (c.deposit || 0);
     }
 
-    // ====================== FREEZE TOÀN BỘ LỊCH SỬ ======================
     function freezeContract(contract) {
       if (contract.frozenData) return;
-
       contract.frozenData = {
         customer: contract.customer,
         phone: contract.phone,
@@ -820,7 +923,6 @@
       };
     }
 
-    // ====================== XÁC NHẬN ======================
     function showConfirm(title, message, icon, callback) {
       document.getElementById('confirmTitle').textContent = title;
       document.getElementById('confirmMessage').innerHTML = message;
@@ -837,6 +939,17 @@
       document.getElementById('simpleConfirmModal').style.display = 'flex';
     }
     function closeSimpleConfirmModal() { document.getElementById('simpleConfirmModal').style.display = 'none'; }
+
+    // ====================== FORMAT TIỀN ======================
+    function formatPriceInput(e) {
+      let value = e.target.value.replace(/[^0-9]/g, '');
+      let formatted = '';
+      for (let i = 0; i < value.length; i++) {
+        if (i > 0 && (value.length - i) % 3 === 0) formatted += ' ';
+        formatted += value[i];
+      }
+      e.target.value = formatted;
+    }
 
     // ====================== HÀNH ĐỘNG ======================
     function editContract(id) {
@@ -864,9 +977,10 @@
       document.getElementById('rentTime').value = contract.rentTime || '08:00';
       document.getElementById('returnTime').value = contract.returnTime || '18:00';
       document.getElementById('rentDayType').value = contract.rentDayType || 'cungngay';
-      document.getElementById('deposit').value = formatMoney(contract.deposit || 0).replace(/\s/g, '');
-      document.getElementById('discount').value = formatMoney(contract.discount || 0).replace(/\s/g, '');
       document.getElementById('status').value = contract.status || 'Chưa nhận xe';
+
+      document.getElementById('deposit').value = contract.deposit || 0;
+      document.getElementById('discount').value = contract.discount || 0;
 
       const extraList = document.getElementById('extraFeesList');
       extraList.innerHTML = '';
@@ -881,7 +995,8 @@
             <option value="Phí hao mòn" ${fee.type==='Phí hao mòn'?'selected':''}>Phí hao mòn</option>
             <option value="Phí khác" ${fee.type==='Phí khác'?'selected':''}>Phí khác</option>
           </select>
-          <input type="text" class="fee-amount money-input" inputmode="numeric" pattern="[0-9\\s]*" value="${formatMoney(fee.amount||0).replace(/\s/g,'')}" style="flex:2;">
+          <input type="text" class="fee-amount money-input" inputmode="numeric" pattern="[0-9\\s]*" 
+                 value="${fee.amount || 0}" style="flex:2;">
           <button type="button" onclick="this.parentElement.remove()" class="btn btn-danger" style="padding:8px 12px;">Xóa</button>
         `;
         extraList.appendChild(row);
@@ -921,7 +1036,7 @@
     }
 
     function confirmReturn(id) {
-      showConfirm("Xác nhận trả xe", "Bạn chắc chắn khách đã trả xe?<br><strong>Toàn bộ thông tin sẽ được ghi nhận vĩnh viễn.</strong>", "🔄", () => {
+      showConfirm("Xác nhận trả xe", "Bạn chắc chắn khách đã trả xe?<br><strong>Toàn bộ thông tin sẽ được lưu lại.</strong>", "🔄", () => {
         const contract = contracts.find(c => c.id === id);
         if (contract) {
           freezeContract(contract);
@@ -929,7 +1044,7 @@
         }
         renderAll();
         saveData();
-        showToast("Hợp đồng đã hoàn tất và được freeze vĩnh viễn!");
+        showToast("Hợp đồng đã hoàn tất!");
       });
     }
 
@@ -942,9 +1057,9 @@
 
       document.getElementById('carType').value = car.type || '';
       document.getElementById('licensePlate').value = car.plate || '';
-      document.getElementById('dailyPrice').value = formatMoney(car.daily || 0).replace(/\s/g,'');
-      document.getElementById('weekendPrice').value = formatMoney(car.weekend || 0).replace(/\s/g,'');
-      document.getElementById('holidayPrice').value = formatMoney(car.holiday || 0).replace(/\s/g,'');
+      document.getElementById('dailyPrice').value = car.daily || 0;
+      document.getElementById('weekendPrice').value = car.weekend || 0;
+      document.getElementById('holidayPrice').value = car.holiday || 0;
 
       document.getElementById('carModal').style.display = 'flex';
     }
@@ -1095,16 +1210,6 @@
       container.appendChild(row);
     }
 
-    function formatPriceInput(e) {
-      let value = e.target.value.replace(/[^0-9]/g, '');
-      let formatted = '';
-      for (let i = 0; i < value.length; i++) {
-        if (i > 0 && (value.length - i) % 3 === 0) formatted += ' ';
-        formatted += value[i];
-      }
-      e.target.value = formatted;
-    }
-
     // ====================== RENDER ======================
     function renderActiveContracts() {
       const tbody = document.getElementById('activeContractBody');
@@ -1204,7 +1309,6 @@
       });
     }
 
-    // ====================== DOANH THU ======================
     function populateRevenueFilters() {
       const years = new Set();
       contracts.forEach(c => {
@@ -1305,11 +1409,9 @@
       document.getElementById('totalRevenue').textContent = formatMoney(totalRevenue) + ' ₫';
     }
 
-    // ====================== IN BÁO CÁO (ĐÃ SỬA) ======================
     function printRevenue() {
       let filtered = contracts.filter(c => c.status === "Đã hoàn tất");
 
-      // Áp dụng đúng các filter hiện tại
       if (currentRevenueYear) filtered = filtered.filter(c => new Date(c.rentDate).getFullYear().toString() === currentRevenueYear);
       if (currentRevenueMonth) filtered = filtered.filter(c => (new Date(c.rentDate).getMonth() + 1).toString() === currentRevenueMonth);
       if (currentRevenueCar) filtered = filtered.filter(c => c.plate === currentRevenueCar);
@@ -1336,7 +1438,7 @@
           </style>
         </head>
         <body>
-          <h1>BÁO CÁO DOANH THU - CARRENT</h1>
+          <h1>BÁO CÁO DOANH THU</h1>
           <h2>${document.getElementById('revenueTitle').textContent}</h2>
           <div class="total">Tổng doanh thu: ${document.getElementById('totalRevenue').textContent}</div>
           <table>
@@ -1434,6 +1536,17 @@
       document.getElementById('carModal').style.display = 'flex';
     }
     function closeCarModal() { document.getElementById('carModal').style.display = 'none'; }
+
+    function refreshApp() {
+      if (confirm("Làm mới toàn bộ trang?\nDữ liệu sẽ được tải lại từ server.")) {
+        window.location.reload();
+      }
+    }
+
+    function goHome() {
+      switchTab(0);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
     // ====================== FORM SUBMIT ======================
     document.getElementById('contractForm').addEventListener('submit', e => {
@@ -1536,7 +1649,6 @@
     window.onload = async () => {
       await loadData();
 
-      // Freeze toàn bộ lịch sử hợp đồng cũ nếu chưa có
       let migrated = false;
       contracts.forEach(c => {
         if (c.status === "Đã hoàn tất" && !c.frozenData) {
@@ -1562,10 +1674,20 @@
         renderActiveContracts();
       });
 
+      // Gắn sự kiện format tiền
       const moneyFields = ['dailyPrice','weekendPrice','holidayPrice','deposit','discount'];
       moneyFields.forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.addEventListener('blur', formatPriceInput);
+        if (el) {
+          el.addEventListener('input', formatPriceInput);
+          el.addEventListener('blur', formatPriceInput);
+        }
+      });
+
+      document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('fee-amount')) {
+          formatPriceInput(e);
+        }
       });
 
       document.getElementById('confirmCancelBtn').addEventListener('click', () => {
@@ -1581,7 +1703,7 @@
         closeSimpleConfirmModal();
       });
 
-      console.log("🚀 CarRent hoàn chỉnh - In báo cáo đã sửa đúng filter theo xe!");
+      console.log("🚀 CarRent v1.2.3 - Nút hành động đã được sắp xếp ngang");
     };
   </script>
 </body>
