@@ -103,7 +103,7 @@
       color: var(--primary-dark);
       font-weight: 600;
     }
-    tr:hover { background: #f1f5f9; }
+    tr:hover { background: #f1f5f9; cursor: pointer; }
 
     .status {
       padding: 6px 12px;
@@ -385,6 +385,56 @@
       font-size: 1rem;
     }
 
+    /* Pop-up hành động cho hợp đồng */
+    .action-popup {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(10px);
+      align-items: center;
+      justify-content: center;
+      z-index: 2500;
+      padding: 15px;
+    }
+
+    .action-popup-content {
+      background: white;
+      border-radius: 24px;
+      width: 100%;
+      max-width: 480px;
+      padding: 25px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      animation: modalPop 0.3s ease;
+    }
+
+    .action-popup-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .action-popup-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-bottom: 8px;
+    }
+
+    .action-popup-info {
+      background: #f8fafc;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .action-buttons-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
     .version {
       text-align: center;
       margin-top: 50px;
@@ -399,10 +449,11 @@
       .fab { width: 55px; height: 55px; bottom: 20px; right: 20px; }
       .action-buttons { bottom: 20px; right: 88px; gap: 10px; }
       .action-btn { width: 48px; height: 48px; font-size: 1.25rem; }
+      .action-popup-content { padding: 20px; }
     }
 
     @media print {
-      .tabs, .fab, .action-buttons, header, .modal, #tab0, #tab1, .btn:not(.print-only) { display: none !important; }
+      .tabs, .fab, .action-buttons, header, .modal, .action-popup, #tab0, #tab1, .btn:not(.print-only) { display: none !important; }
       #tab2 { display: block !important; box-shadow: none; }
       .table-container { overflow: visible; }
     }
@@ -456,7 +507,6 @@
               <th>Còn lại</th>
               <th>Trạng thái</th>
               <th>Ghi chú</th>
-              <th>Hành động</th>
             </tr>
           </thead>
           <tbody id="activeContractBody"></tbody>
@@ -666,6 +716,37 @@
     </div>
   </div>
 
+  <!-- Pop-up Hành động hợp đồng -->
+  <div id="actionPopup" class="action-popup">
+    <div class="action-popup-content">
+      <div class="action-popup-header">
+        <h2 id="popupContractTitle" class="action-popup-title"></h2>
+        <div id="popupContractInfo" class="action-popup-info"></div>
+      </div>
+
+      <div class="action-buttons-grid">
+        <button onclick="editFromPopup()" class="btn btn-edit" style="width:100%; justify-content:center;">
+          <i class="fas fa-edit"></i> Sửa hợp đồng
+        </button>
+        <button onclick="openActiveNoteFromPopup()" class="btn btn-note" style="width:100%; justify-content:center;">
+          <i class="fas fa-sticky-note"></i> Ghi chú
+        </button>
+        <button id="receiveBtnPopup" onclick="confirmReceiveFromPopup()" class="btn btn-success" style="width:100%; justify-content:center;">
+          <i class="fas fa-car"></i> Nhận xe
+        </button>
+        <button id="returnBtnPopup" onclick="confirmReturnFromPopup()" class="btn btn-info" style="width:100%; justify-content:center; display:none;">
+          <i class="fas fa-undo"></i> Trả xe
+        </button>
+        <button onclick="deleteFromPopup()" class="btn btn-danger" style="width:100%; justify-content:center;">
+          <i class="fas fa-trash"></i> Huỷ hợp đồng
+        </button>
+        <button onclick="closeActionPopup()" class="btn btn-secondary" style="width:100%; justify-content:center;">
+          Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal Ghi chú đang xử lý -->
   <div id="noteModal" class="modal">
     <div class="modal-content" style="max-width: 500px;">
@@ -805,7 +886,7 @@
   </div>
 
   <div class="version">
-    CarRent v1.2.4 (2026)
+    CarRent v1.2.5 (2026)
   </div>
 
   <script>
@@ -832,6 +913,7 @@
     let currentRevenueType = '';
 
     let currentContractType = 'normal';
+    let currentActionContractId = null;   // ID hợp đồng đang mở pop-up hành động
 
     // ====================== HELPER ======================
     function formatMoney(num) {
@@ -977,7 +1059,7 @@
       };
     }
 
-    // ====================== HÀM XÁC NHẬN (ĐÃ SỬA LỖI) ======================
+    // ====================== XÁC NHẬN ======================
     function showConfirm(title, message, icon, callback) {
       document.getElementById('confirmTitle').textContent = title;
       document.getElementById('confirmMessage').innerHTML = message;
@@ -1059,6 +1141,79 @@
 
     function closeHistoryNoteModal() {
       document.getElementById('historyNoteModal').style.display = 'none';
+    }
+
+    // ====================== POP-UP HÀNH ĐỘNG ======================
+    function showActionPopup(id) {
+      currentActionContractId = id;
+      const contract = contracts.find(c => c.id === id);
+      if (!contract) return;
+
+      document.getElementById('popupContractTitle').textContent = contract.customer;
+
+      let infoHTML = `
+        <strong>Xe:</strong> ${contract.carType} - ${contract.plate}<br>
+        <strong>Nhận:</strong> ${formatDate(contract.rentDate)} ${contract.rentTime || ''} 
+        ${contract.rentDayType === "homtruoc" ? '(tối hôm trước)' : ''}<br>
+        <strong>Trả:</strong> ${formatDate(contract.returnDate)} ${contract.returnTime || ''}<br>
+        <strong>Tổng tiền:</strong> <span style="color:#16a34a;font-weight:600;">${formatMoney(calculateTotal(contract))} ₫</span><br>
+        <strong>Cọc:</strong> ${formatMoney(contract.deposit || 0)} ₫ | 
+        <strong>Còn lại:</strong> <span style="color:${calculateRemaining(contract) === 0 ? '#16a34a' : '#ea580c'};">${formatMoney(calculateRemaining(contract))} ₫</span>
+      `;
+      document.getElementById('popupContractInfo').innerHTML = infoHTML;
+
+      // Ẩn/Hiện nút Nhận xe / Trả xe
+      const receiveBtn = document.getElementById('receiveBtnPopup');
+      const returnBtn = document.getElementById('returnBtnPopup');
+
+      if (contract.status === "Chưa nhận xe") {
+        receiveBtn.style.display = 'flex';
+        returnBtn.style.display = 'none';
+      } else if (contract.status === "Đang thuê") {
+        receiveBtn.style.display = 'none';
+        returnBtn.style.display = 'flex';
+      } else {
+        receiveBtn.style.display = 'none';
+        returnBtn.style.display = 'none';
+      }
+
+      document.getElementById('actionPopup').style.display = 'flex';
+    }
+
+    function closeActionPopup() {
+      document.getElementById('actionPopup').style.display = 'none';
+      currentActionContractId = null;
+    }
+
+    // === SỬA LỖI Ở ĐÂY: LẤY ID TRƯỚC KHI ĐÓNG POP-UP ===
+    function editFromPopup() {
+      const id = currentActionContractId;
+      closeActionPopup();
+      editContract(id);
+    }
+
+    function openActiveNoteFromPopup() {
+      const id = currentActionContractId;
+      closeActionPopup();
+      openActiveNoteModal(id);
+    }
+
+    function confirmReceiveFromPopup() {
+      const id = currentActionContractId;
+      closeActionPopup();
+      confirmReceive(id);
+    }
+
+    function confirmReturnFromPopup() {
+      const id = currentActionContractId;
+      closeActionPopup();
+      confirmReturn(id);
+    }
+
+    function deleteFromPopup() {
+      const id = currentActionContractId;
+      closeActionPopup();
+      deleteContract(id);
     }
 
     // ====================== LỊCH XE ======================
@@ -1158,8 +1313,7 @@
     }
 
     function showCarSchedule(id) {
-      currentMonth = new Date().getMonth();
-      currentYear = new Date().getFullYear();
+      currentMonth = new Date().getFullYear() === currentYear && new Date().getMonth() === currentMonth ? new Date().getMonth() : currentMonth;
       document.getElementById('scheduleModal').style.display = 'flex';
       renderCalendar(id);
     }
@@ -1247,19 +1401,8 @@
           ? (contract.activeNote.length > 30 ? contract.activeNote.substring(0,30) + '...' : contract.activeNote) 
           : '<small style="color:#94a3b8;">—</small>';
 
-        const actionHTML = `
-          <button onclick="editContract(${contract.id})" class="btn btn-edit" style="padding:8px 12px;font-size:0.85rem;">Sửa</button>
-          <button onclick="openActiveNoteModal(${contract.id})" class="btn btn-note" style="padding:8px 12px;font-size:0.85rem;">📝 Ghi chú</button>
-          ${contract.status === "Chưa nhận xe" ? `<button onclick="confirmReceive(${contract.id})" class="btn btn-success" style="padding:8px 12px;font-size:0.85rem;">Nhận xe</button>` : ''}
-          ${contract.status === "Đang thuê" ? `<button onclick="confirmReturn(${contract.id})" class="btn btn-info" style="padding:8px 12px;font-size:0.85rem;">Trả xe</button>` : ''}
-          <button onclick="deleteContract(${contract.id})" class="btn btn-danger" style="padding:8px 12px;font-size:0.85rem;">Hủy</button>
-        `;
-
-        const remainHTML = remain === 0 
-          ? `0 ₫ <small style="color:#16a34a;">(Đã thu đủ)</small>` 
-          : `${formatMoney(remain)} ₫`;
-
         const tr = document.createElement('tr');
+        tr.onclick = () => showActionPopup(contract.id);
         tr.innerHTML = `
           <td><strong>${contract.customer || ''}</strong></td>
           <td>${contract.phone || ''}</td>
@@ -1270,10 +1413,9 @@
           <td>${formatDate(contract.returnDate)}<br>${returnNote}</td>
           <td>${totalHTML}</td>
           <td style="color:#16a34a;font-weight:600;">${formatMoney(contract.deposit||0)} ₫</td>
-          <td style="color:${remain===0?'#16a34a':'#ea580c'};font-weight:600;">${remainHTML}</td>
+          <td style="color:${remain===0?'#16a34a':'#ea580c'};font-weight:600;">${remain === 0 ? `0 ₫ <small style="color:#16a34a;">(Đã thu đủ)</small>` : `${formatMoney(remain)} ₫`}</td>
           <td>${statusHTML}</td>
           <td>${noteShort}</td>
-          <td style="display:flex; gap:6px; flex-wrap:wrap;">${actionHTML}</td>
         `;
         tbody.appendChild(tr);
       });
@@ -1294,10 +1436,10 @@
           <td>${formatMoney(car.daily)} ₫</td>
           <td>${formatMoney(car.weekend)} ₫</td>
           <td>${formatMoney(car.holiday)} ₫</td>
-          <td><button onclick="showCarSchedule(${car.id})" class="btn btn-info" style="padding:8px 16px;font-size:0.9rem;">📅 Xem lịch</button></td>
+          <td><button onclick="showCarSchedule(${car.id}); event.stopImmediatePropagation();" class="btn btn-info" style="padding:8px 16px;font-size:0.9rem;">📅 Xem lịch</button></td>
           <td style="display:flex; gap:6px;">
-            <button onclick="editCar(${car.id})" class="btn btn-edit" style="padding:8px 12px;"><i class="fas fa-edit"></i></button>
-            <button onclick="deleteCar(${car.id})" class="btn btn-danger" style="padding:8px 12px;"><i class="fas fa-trash"></i></button>
+            <button onclick="editCar(${car.id}); event.stopImmediatePropagation();" class="btn btn-edit" style="padding:8px 12px;"><i class="fas fa-edit"></i></button>
+            <button onclick="deleteCar(${car.id}); event.stopImmediatePropagation();" class="btn btn-danger" style="padding:8px 12px;"><i class="fas fa-trash"></i></button>
           </td>
         `;
         tbody.appendChild(tr);
@@ -1408,7 +1550,7 @@
           <td style="text-align:right;">${formatMoney(d.discount)} ₫</td>
           <td style="color:#16a34a;font-weight:700;text-align:right;">${formatMoney(d.totalAmount)} ₫</td>
           <td>${noteShort}</td>
-          <td><button onclick="openHistoryNoteModal(${contract.id})" class="btn btn-note" style="padding:8px 12px;font-size:0.85rem;">📝 Sửa ghi chú</button></td>
+          <td><button onclick="openHistoryNoteModal(${contract.id}); event.stopImmediatePropagation();" class="btn btn-note" style="padding:8px 12px;font-size:0.85rem;">📝 Sửa ghi chú</button></td>
         `;
         tbody.appendChild(tr);
       });
@@ -1622,6 +1764,7 @@
     }
 
     function deleteContract(id) {
+      if (!id) return;
       showSimpleConfirm("Hủy hợp đồng", "Bạn có chắc muốn hủy hợp đồng này?<br><strong>Hành động này không thể hoàn tác.</strong>", () => {
         contracts = contracts.filter(c => c.id !== id);
         renderAll();
@@ -1631,6 +1774,7 @@
     }
 
     function confirmReceive(id) {
+      if (!id) return;
       const contract = contracts.find(c => c.id === id);
       if (!contract) return;
       const rental = calculateRentalTotal(contract);
@@ -1652,6 +1796,7 @@
     }
 
     function confirmReturn(id) {
+      if (!id) return;
       showConfirm("Xác nhận trả xe", "Bạn chắc chắn khách đã trả xe?<br><strong>Toàn bộ thông tin sẽ được lưu lại.</strong>", "🔄", () => {
         const contract = contracts.find(c => c.id === id);
         if (contract) {
@@ -1875,7 +2020,12 @@
         closeSimpleConfirmModal();
       });
 
-      console.log("🚀 CarRent v1.2.4 FIXED - Nút Nhận xe & Hủy đã hoạt động bình thường");
+      // Đóng pop-up khi click ngoài
+      document.getElementById('actionPopup').addEventListener('click', function(e) {
+        if (e.target === this) closeActionPopup();
+      });
+
+      console.log("🚀 CarRent v1.2.6 - Hành động qua pop-up đã được triển khai thành công (nút popup đã sửa)");
     };
 
     function formatPriceInput(e) {
