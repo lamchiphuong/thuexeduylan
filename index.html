@@ -652,7 +652,7 @@
 
       <div style="background:#f0fdf4; border-radius:16px; padding:20px; margin-bottom:25px; display:flex; justify-content:space-between; align-items:center;">
         <div>
-          <span id="revenueTitle" style="font-size:1.05rem; color:#166534;">Tổng doanh thu từ tất cả cuốc đã hoàn tất</span>
+          <span id="revenueTitle" style="font-size:1.05rem; color:#166534;">Tổng doanh thu từ tất cả hợp đồng đã hoàn tất</span>
           <h1 id="totalRevenue" style="color:#16a34a; font-size:2.5rem; margin:8px 0 0 0;">0 ₫</h1>
         </div>
       </div>
@@ -1459,11 +1459,11 @@
       container.appendChild(row);
     }
 
-    // ====================== NHẬN XE SẮP TỚI - ĐÃ SỬA THEO YÊU CẦU ======================
+    // ====================== NHẬN XE SẮP TỚI (v1.2.7) ======================
     function getRealReceiveDate(contract) {
       let date = new Date(contract.rentDate);
       if (contract.rentDayType === "homtruoc") {
-        date.setDate(date.getDate() - 1); // Lùi 1 ngày nếu nhận tối hôm trước
+        date.setDate(date.getDate() - 1);
       }
       return date;
     }
@@ -1712,7 +1712,7 @@
       if (currentRevenueCar) filtered = filtered.filter(c => c.plate === currentRevenueCar);
       if (currentRevenueType) filtered = filtered.filter(c => (c.contractType || 'normal') === currentRevenueType);
 
-      let titleText = "Tổng doanh thu từ tất cả cuốc đã hoàn tất";
+      let titleText = "Tổng doanh thu từ tất cả hợp đồng hoàn tất";
       if (currentRevenueYear && currentRevenueMonth) titleText = `Doanh thu tháng ${currentRevenueMonth} / ${currentRevenueYear}`;
       if (currentRevenueCar) {
         const car = cars.find(c => c.plate === currentRevenueCar);
@@ -1750,11 +1750,96 @@
       document.getElementById('totalRevenue').textContent = formatMoney(totalRevenue) + ' ₫';
     }
 
+    // ====================== IN BÁO CÁO (GIỮ NGUYÊN TỪ v1.2.6) ======================
+    function printRevenue() {
+      let filtered = contracts.filter(c => c.status === "Đã hoàn tất");
+
+      if (currentRevenueYear) filtered = filtered.filter(c => new Date(c.rentDate).getFullYear().toString() === currentRevenueYear);
+      if (currentRevenueMonth) filtered = filtered.filter(c => (new Date(c.rentDate).getMonth() + 1).toString() === currentRevenueMonth);
+      if (currentRevenueCar) filtered = filtered.filter(c => c.plate === currentRevenueCar);
+      if (currentRevenueType) filtered = filtered.filter(c => (c.contractType || 'normal') === currentRevenueType);
+
+      if (filtered.length === 0) {
+        alert("Không có dữ liệu để in theo bộ lọc hiện tại!");
+        return;
+      }
+
+      const printWin = window.open('', '_blank');
+      let html = `
+        <html>
+        <head>
+          <title>Báo cáo Doanh thu CarRent</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 30px; }
+            h1 { color: #2563eb; text-align: center; }
+            h2 { text-align: center; color: #475569; margin-bottom: 20px; }
+            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            th, td { border: 1px solid #999; padding: 10px; text-align: left; }
+            th { background: #2563eb; color: white; }
+            .total { font-size: 1.6rem; color: #16a34a; font-weight: bold; text-align: right; margin: 30px 0; }
+            .date { text-align: center; color: #64748b; margin-top: 60px; }
+          </style>
+        </head>
+        <body>
+          <h1>BÁO CÁO DOANH THU</h1>
+          <h2>${document.getElementById('revenueTitle').textContent}</h2>
+          <div class="total">Tổng doanh thu: ${document.getElementById('totalRevenue').textContent}</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Khách hàng</th>
+                <th>SĐT</th>
+                <th>Loại xe</th>
+                <th>Biển số</th>
+                <th>Loại hợp đồng</th>
+                <th>Nhận xe</th>
+                <th>Trả xe</th>
+                <th>Số ngày</th>
+                <th>Tiền thuê xe</th>
+                <th>Phụ phí</th>
+                <th>Giảm giá</th>
+                <th>Tổng doanh thu</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      filtered.forEach(con => {
+        const d = getCompletedDisplay(con);
+        html += `
+          <tr>
+            <td>${d.customer || ''}</td>
+            <td>${d.phone || ''}</td>
+            <td>${d.carType || ''}</td>
+            <td>${d.plate || ''}</td>
+            <td>${d.contractType === 'app' ? 'Đặt qua app' : 'Thuê thường'}</td>
+            <td>${formatDate(d.rentDate)} ${d.rentTime || ''}</td>
+            <td>${formatDate(d.returnDate)} ${d.returnTime || ''}</td>
+            <td style="text-align:center;">${calculateDays(d.rentDate, d.returnDate)}</td>
+            <td style="text-align:right;">${formatMoney(d.rentalAmount)} ₫</td>
+            <td style="text-align:right;">${formatMoney(d.extraFees.reduce((s,f)=>s+(f.amount||0),0))} ₫</td>
+            <td style="text-align:right;">${formatMoney(d.discount)} ₫</td>
+            <td style="font-weight:bold;color:#16a34a;text-align:right;">${formatMoney(d.totalAmount)} ₫</td>
+          </tr>`;
+      });
+
+      html += `
+            </tbody>
+          </table>
+          <div class="date">In ngày: ${new Date().toLocaleDateString('vi-VN', { year: 'numeric', month: '2-digit', day: '2-digit' })}</div>
+        </body>
+        </html>`;
+
+      printWin.document.write(html);
+      printWin.document.close();
+      setTimeout(() => printWin.print(), 600);
+    }
+
     function renderAll() {
       renderActiveContracts();
       renderCars();
       renderCompletedContracts();
-      renderUpcomingSection();   // Cập nhật khu vực nhận xe sắp tới
+      renderUpcomingSection();
     }
 
     function switchTab(tab) {
@@ -1764,7 +1849,7 @@
       document.getElementById('tab2').style.display = tab===2 ? 'block' : 'none';
     }
 
-    // ====================== CÁC HÀM MODAL & FORM (giữ nguyên) ======================
+    // ====================== MODAL & FORM ======================
     function showAddContractModal() {
       document.getElementById('contractModalTitle').textContent = "Thêm hợp đồng thuê xe";
       document.getElementById('contractSubmitBtn').textContent = "Lưu hợp đồng";
@@ -2129,7 +2214,7 @@
         if (e.target === this) closeActionPopup();
       });
 
-      console.log("🚀 CarRent v1.2.7 đã chạy thành công - Hỗ trợ nhận xe tối hôm trước!");
+      console.log("🚀 CarRent v1.2.7 - Đã khôi phục đầy đủ chức năng In báo cáo!");
     };
 
     function formatPriceInput(e) {
