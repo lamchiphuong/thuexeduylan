@@ -1476,7 +1476,7 @@
       const isToday = realDate.toDateString() === today.toDateString();
       const isTomorrow = realDate.toDateString() === new Date(today.getTime() + 86400000).toDateString();
 
-      let label = isToday ? "Hôm nay" : (isTomorrow ? "Mai" : formatDate(realDate.toISOString().split('T')[0]));
+      let label = isToday ? "Hôm nay" : (isTomorrow ? "Ngày mai" : formatDate(realDate.toISOString().split('T')[0]));
       return {
         fullDisplay: `${label} - ${formatDate(realDate.toISOString().split('T')[0])} ${contract.rentTime || '08:00'}`,
         realDateObj: realDate
