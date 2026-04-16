@@ -442,7 +442,7 @@
       opacity: 0.75;
     }
 
-    /* ==================== CSS MỚI CHO UPCOMING SECTION (v1.2.7) ==================== */
+    /* ==================== CSS CHO UPCOMING SECTION ==================== */
     .upcoming-section {
       background: white;
       border-radius: 20px;
@@ -489,13 +489,57 @@
       color: #ea580c;
     }
 
+    /* ==================== CSS CHO XE ĐẾN HẠN TRẢ (v1.2.8) ==================== */
+    .returning-section {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+      margin-bottom: 25px;
+      border-top: 5px solid #f59e0b;
+    }
+    .returning-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      color: #c2410c;
+    }
+    .returning-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 16px;
+    }
+    .returning-card {
+      border: 2px solid #fed7aa;
+      border-radius: 16px;
+      padding: 18px;
+      transition: all 0.3s ease;
+      background: #fffbeb;
+    }
+    .returning-card:hover {
+      border-color: #f59e0b;
+      box-shadow: 0 8px 25px rgba(245, 158, 11, 0.15);
+    }
+    .returning-time {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #c2410c;
+      margin-bottom: 10px;
+    }
+    .returning-info {
+      line-height: 1.65;
+      margin-bottom: 12px;
+      font-size: 0.98rem;
+    }
+
     @media (max-width: 600px) {
       body { padding: 10px; padding-bottom: 130px; }
       h1 { font-size: 2.2rem; }
       .fab { width: 55px; height: 55px; bottom: 20px; right: 20px; }
       .action-buttons { bottom: 20px; right: 88px; gap: 10px; }
       .action-btn { width: 48px; height: 48px; font-size: 1.25rem; }
-      .upcoming-grid { grid-template-columns: 1fr; }
+      .upcoming-grid, .returning-grid { grid-template-columns: 1fr; }
     }
 
     @media print {
@@ -509,7 +553,7 @@
   <div class="container">
     <header>
       <h1><i class="fas fa-car"></i> CarRent</h1>
-      <p class="subtitle">Quản lý thuê xe thông minh <span style="font-size:0.9rem;color:#64748b;"></span></p>
+      <p class="subtitle">Quản lý thuê xe thông minh</p>
     </header>
 
     <div class="tabs">
@@ -518,7 +562,7 @@
       <div class="tab" onclick="switchTab(2)">📊 Lịch sử & Doanh thu</div>
     </div>
 
-    <!-- ==================== KHU VỰC MỚI: NHẬN XE SẮP TỚI (v1.2.7) ==================== -->
+    <!-- Nhận xe sắp tới -->
     <div id="upcomingSection" class="upcoming-section" style="display: none;">
       <div class="upcoming-header">
         <i class="fas fa-clock" style="font-size:1.7rem;"></i>
@@ -527,7 +571,16 @@
       <div id="upcomingGrid" class="upcoming-grid"></div>
     </div>
 
-    <!-- Tab 0: Hợp đồng đang xử lý -->
+    <!-- Xe đến hạn trả (mới) -->
+    <div id="returningSection" class="returning-section" style="display: none;">
+      <div class="returning-header">
+        <i class="fas fa-clock" style="font-size:1.7rem;"></i>
+        <h2>Xe đến hạn trả <small style="color:#64748b; font-weight:normal;">(hôm nay & ngày mai)</small></h2>
+      </div>
+      <div id="returningGrid" class="returning-grid"></div>
+    </div>
+
+    <!-- Tab 0 -->
     <div id="tab0" class="card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
         <h2><i class="fas fa-list"></i> Danh sách hợp đồng đang xử lý</h2>
@@ -711,7 +764,6 @@
 
         <select id="carSelect" required><option value="">Chọn xe</option></select>
 
-        <!-- Tính năng tự điền tên & SĐT -->
         <label>Tên khách thuê</label>
         <input type="text" id="customerName" list="customerNameList" placeholder="Tên khách thuê" required>
 
@@ -778,7 +830,7 @@
     </div>
   </div>
 
-  <!-- Pop-up Hành động hợp đồng -->
+  <!-- Action Popup -->
   <div id="actionPopup" class="action-popup">
     <div class="action-popup-content">
       <div class="action-popup-header">
@@ -809,14 +861,14 @@
     </div>
   </div>
 
-  <!-- Modal Ghi chú đang xử lý -->
+  <!-- Note Modal -->
   <div id="noteModal" class="modal">
     <div class="modal-content" style="max-width: 500px;">
       <div class="modal-header">
         <h2 id="noteModalTitle">Ghi chú hợp đồng</h2>
         <span class="close" onclick="closeNoteModal()">×</span>
       </div>
-      <textarea id="noteText" rows="6" style="width:100%; resize:vertical;" placeholder="Nhập ghi chú cho hợp đồng đang xử lý..."></textarea>
+      <textarea id="noteText" rows="6" style="width:100%; resize:vertical;" placeholder="Nhập ghi chú..."></textarea>
       <input type="hidden" id="noteContractId">
       <div style="margin-top:20px; display:flex; gap:12px;">
         <button onclick="closeNoteModal()" class="btn btn-secondary" style="flex:1;">Huỷ</button>
@@ -825,23 +877,23 @@
     </div>
   </div>
 
-  <!-- Modal Ghi chú lịch sử -->
+  <!-- History Note Modal -->
   <div id="historyNoteModal" class="modal">
     <div class="modal-content" style="max-width: 500px;">
       <div class="modal-header">
         <h2 id="historyNoteModalTitle">Ghi chú lịch sử</h2>
         <span class="close" onclick="closeHistoryNoteModal()">×</span>
       </div>
-      <textarea id="historyNoteText" rows="6" style="width:100%; resize:vertical;" placeholder="Nhập ghi chú cho hợp đồng đã hoàn tất..."></textarea>
+      <textarea id="historyNoteText" rows="6" style="width:100%; resize:vertical;" placeholder="Nhập ghi chú..."></textarea>
       <input type="hidden" id="historyNoteContractId">
       <div style="margin-top:20px; display:flex; gap:12px;">
         <button onclick="closeHistoryNoteModal()" class="btn btn-secondary" style="flex:1;">Huỷ</button>
-        <button onclick="saveHistoryNote()" class="btn btn-primary" style="flex:1;">Lưu ghi chú lịch sử</button>
+        <button onclick="saveHistoryNote()" class="btn btn-primary" style="flex:1;">Lưu ghi chú</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal Thêm/Sửa Xe -->
+  <!-- Car Modal -->
   <div id="carModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -870,7 +922,7 @@
     </div>
   </div>
 
-  <!-- Modal xác nhận -->
+  <!-- Confirm Modal -->
   <div id="confirmModal" class="modal">
     <div class="modal-content">
       <div class="modal-header" style="justify-content: center; flex-direction: column; text-align: center;">
@@ -886,7 +938,7 @@
     </div>
   </div>
 
-  <!-- Modal xác nhận đơn giản -->
+  <!-- Simple Confirm Modal -->
   <div id="simpleConfirmModal" class="modal">
     <div class="modal-content" style="max-width: 480px;">
       <div class="modal-header" style="justify-content: center; text-align: center;">
@@ -901,7 +953,7 @@
     </div>
   </div>
 
-  <!-- Modal Lịch xe -->
+  <!-- Schedule Modal -->
   <div id="scheduleModal" class="modal calendar-modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -919,7 +971,6 @@
       <div id="calendarGrid" class="calendar"></div>
       <div style="margin-top:15px; font-size:0.9rem; color:#64748b;">
         <span style="background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:4px;">Đang bận</span>
-        <span style="margin-left:15px; color:#64748b;">• Nhấn vào ngày đỏ để xem chi tiết hợp đồng</span>
       </div>
       <div style="margin-top: 25px; text-align: center;">
         <button onclick="closeScheduleModal()" class="btn btn-secondary" style="min-width: 120px;">Đóng</button>
@@ -927,7 +978,7 @@
     </div>
   </div>
 
-  <!-- Modal Chi tiết hợp đồng ngày bận -->
+  <!-- Contract Detail Modal -->
   <div id="contractDetailModal" class="modal">
     <div class="modal-content" style="max-width: 520px;">
       <div class="modal-header">
@@ -948,7 +999,7 @@
   </div>
 
   <div class="version">
-    CarRent v1.2.7 (2026)
+    CarRent v1.2.8 (2026)
   </div>
 
 <script>
@@ -1000,7 +1051,7 @@
       setTimeout(() => toast.style.display = 'none', 4000);
     }
 
-    // ====================== TỰ ĐIỀN KHÁCH HÀNG ======================
+    // ====================== CUSTOMER HISTORY ======================
     let customerHistory = {};
 
     function buildCustomerHistory() {
@@ -1062,7 +1113,7 @@
       }
     }
 
-    // ====================== LOAD & SAVE DATA ======================
+    // ====================== LOAD & SAVE ======================
     async function loadData() {
       try {
         const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
@@ -1182,7 +1233,7 @@
       };
     }
 
-    // ====================== XÁC NHẬN ======================
+    // ====================== CONFIRM ======================
     function showConfirm(title, message, icon, callback) {
       document.getElementById('confirmTitle').textContent = title;
       document.getElementById('confirmMessage').innerHTML = message;
@@ -1215,7 +1266,7 @@
       document.getElementById('customPriceSection').classList.toggle('show', type === 'app');
     }
 
-    // ====================== GHI CHÚ ======================
+    // ====================== NOTES ======================
     function openActiveNoteModal(id) {
       const contract = contracts.find(c => c.id === id);
       if (!contract) return;
@@ -1266,7 +1317,7 @@
       document.getElementById('historyNoteModal').style.display = 'none';
     }
 
-    // ====================== POP-UP HÀNH ĐỘNG ======================
+    // ====================== ACTION POPUP ======================
     function showActionPopup(id) {
       currentActionContractId = id;
       const contract = contracts.find(c => c.id === id);
@@ -1337,7 +1388,7 @@
       deleteContract(id);
     }
 
-    // ====================== LỊCH XE ======================
+    // ====================== CALENDAR ======================
     function renderCalendar(carId) {
       currentScheduleCarId = carId;
       const booked = new Set();
@@ -1459,7 +1510,7 @@
       container.appendChild(row);
     }
 
-    // ====================== NHẬN XE SẮP TỚI (v1.2.7) ======================
+    // ====================== UPCOMING (Nhận xe sắp tới) ======================
     function getRealReceiveDate(contract) {
       let date = new Date(contract.rentDate);
       if (contract.rentDayType === "homtruoc") {
@@ -1552,6 +1603,97 @@
     function quickReceiveContract(id) {
       if (document.getElementById('actionPopup').style.display === 'flex') closeActionPopup();
       confirmReceive(id);
+    }
+
+    // ====================== RETURNING - XE ĐẾN HẠN TRẢ (v1.2.8) ======================
+    function getReturningContracts() {
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      return contracts
+        .filter(c => c.status === "Đang thuê")
+        .map(c => ({
+          ...c,
+          realReturnDate: new Date(c.returnDate)
+        }))
+        .filter(c => {
+          const d = new Date(c.realReturnDate);
+          d.setHours(0,0,0,0);
+          return d.getTime() === today.getTime() || d.getTime() === tomorrow.getTime();
+        })
+        .sort((a, b) => {
+          if (a.realReturnDate.getTime() !== b.realReturnDate.getTime()) {
+            return a.realReturnDate - b.realReturnDate;
+          }
+          return (a.returnTime || '00:00').localeCompare(b.returnTime || '00:00');
+        });
+    }
+
+    function getReturnDisplay(contract) {
+      const retDate = new Date(contract.returnDate);
+      const today = new Date();
+      today.setHours(0,0,0,0);
+
+      const isToday = retDate.toDateString() === today.toDateString();
+      const isTomorrow = retDate.toDateString() === new Date(today.getTime() + 86400000).toDateString();
+
+      let label = isToday ? "Hôm nay" : (isTomorrow ? "Ngày mai" : formatDate(contract.returnDate));
+      return {
+        fullDisplay: `${label} - ${formatDate(contract.returnDate)} ${contract.returnTime || '20:00'}`,
+        realDateObj: retDate
+      };
+    }
+
+    function renderReturningSection() {
+      const container = document.getElementById('returningSection');
+      const grid = document.getElementById('returningGrid');
+      grid.innerHTML = '';
+
+      const returning = getReturningContracts();
+
+      if (returning.length === 0) {
+        container.style.display = 'none';
+        return;
+      }
+
+      container.style.display = 'block';
+
+      returning.forEach(contract => {
+        const display = getReturnDisplay(contract);
+        const remain = calculateRemaining(contract);
+
+        const div = document.createElement('div');
+        div.className = 'returning-card';
+        div.innerHTML = `
+          <div class="returning-time">
+            <i class="fas fa-clock"></i> ${display.fullDisplay}
+          </div>
+          <div class="returning-info">
+            <strong onclick="showActionPopup(${contract.id}); event.stopImmediatePropagation();" 
+                    style="cursor:pointer; color:#1f2937;">
+              ${contract.customer}
+            </strong><br>
+            🚗 ${contract.carType} - ${contract.plate}
+          </div>
+          <div style="margin:12px 0 16px 0;">
+            <span style="font-size:1.15rem; font-weight:700; color:#c2410c;">
+              Còn phải thu: ${formatMoney(remain)} ₫
+            </span>
+          </div>
+          <button onclick="quickReturnContract(${contract.id}); event.stopImmediatePropagation();" 
+                  class="btn btn-info" style="width:100%; padding:14px;">
+            <i class="fas fa-undo"></i> Trả xe ngay
+          </button>
+        `;
+        grid.appendChild(div);
+      });
+    }
+
+    function quickReturnContract(id) {
+      if (document.getElementById('actionPopup').style.display === 'flex') closeActionPopup();
+      confirmReturn(id);
     }
 
     // ====================== RENDER ======================
@@ -1750,7 +1892,6 @@
       document.getElementById('totalRevenue').textContent = formatMoney(totalRevenue) + ' ₫';
     }
 
-    // ====================== IN BÁO CÁO (GIỮ NGUYÊN TỪ v1.2.6) ======================
     function printRevenue() {
       let filtered = contracts.filter(c => c.status === "Đã hoàn tất");
 
@@ -1840,6 +1981,7 @@
       renderCars();
       renderCompletedContracts();
       renderUpcomingSection();
+      renderReturningSection();
     }
 
     function switchTab(tab) {
@@ -1849,7 +1991,7 @@
       document.getElementById('tab2').style.display = tab===2 ? 'block' : 'none';
     }
 
-    // ====================== MODAL & FORM ======================
+    // ====================== MODALS ======================
     function showAddContractModal() {
       document.getElementById('contractModalTitle').textContent = "Thêm hợp đồng thuê xe";
       document.getElementById('contractSubmitBtn').textContent = "Lưu hợp đồng";
@@ -2214,7 +2356,7 @@
         if (e.target === this) closeActionPopup();
       });
 
-      console.log("🚀 CarRent v1.2.7 - Đã khôi phục đầy đủ chức năng In báo cáo!");
+      console.log("🚀 CarRent v1.2.8 - Đã thêm phần Xe đến hạn trả thành công!");
     };
 
     function formatPriceInput(e) {
