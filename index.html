@@ -44,7 +44,7 @@
       background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
       min-height: 100vh;
       padding: 15px;
-      padding-bottom: 120px;
+      padding-bottom: 130px;
     }
 
     .container { max-width: 1400px; margin: 0 auto; }
@@ -442,26 +442,32 @@
       opacity: 0.75;
     }
 
-    /* ==================== CSS CHO UPCOMING SECTION ==================== */
-    .upcoming-section {
+    /* ==================== SECTION STYLES ==================== */
+    .upcoming-section, .returning-section, .overdue-section {
       background: white;
       border-radius: 20px;
       padding: 20px;
       box-shadow: 0 12px 30px rgba(0,0,0,0.08);
       margin-bottom: 25px;
     }
-    .upcoming-header {
+    .overdue-section { border-top: 5px solid #dc2626; }
+
+    .section-header {
       display: flex;
       align-items: center;
       gap: 12px;
       margin-bottom: 18px;
-      color: var(--primary-dark);
     }
-    .upcoming-grid {
+    .upcoming-header { color: var(--primary-dark); }
+    .returning-header { color: #c2410c; }
+    .overdue-header { color: #dc2626; }
+
+    .section-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
       gap: 16px;
     }
+
     .upcoming-card {
       border: 2px solid #e0f2fe;
       border-radius: 16px;
@@ -472,44 +478,7 @@
       border-color: var(--primary);
       box-shadow: 0 8px 25px rgba(37,99,235,0.15);
     }
-    .upcoming-time {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--primary);
-      margin-bottom: 10px;
-    }
-    .upcoming-info {
-      line-height: 1.65;
-      margin-bottom: 12px;
-      font-size: 0.98rem;
-    }
-    .remain-money {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: #ea580c;
-    }
 
-    /* ==================== CSS CHO XE ĐẾN HẠN TRẢ (v1.2.8) ==================== */
-    .returning-section {
-      background: white;
-      border-radius: 20px;
-      padding: 20px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
-      margin-bottom: 25px;
-      border-top: 5px solid #f59e0b;
-    }
-    .returning-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 18px;
-      color: #c2410c;
-    }
-    .returning-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-      gap: 16px;
-    }
     .returning-card {
       border: 2px solid #fed7aa;
       border-radius: 16px;
@@ -521,25 +490,50 @@
       border-color: #f59e0b;
       box-shadow: 0 8px 25px rgba(245, 158, 11, 0.15);
     }
-    .returning-time {
-      font-size: 1.1rem;
+
+    .overdue-card {
+      border: 2px solid #fecaca;
+      border-radius: 16px;
+      padding: 18px;
+      background: #fef2f2;
+      transition: all 0.3s ease;
+    }
+    .overdue-card:hover {
+      border-color: #dc2626;
+      box-shadow: 0 8px 25px rgba(220, 38, 38, 0.15);
+    }
+
+    .overdue-badge {
+      background: #dc2626;
+      color: white;
+      padding: 5px 14px;
+      border-radius: 9999px;
+      font-size: 0.82rem;
       font-weight: 700;
-      color: #c2410c;
+      display: inline-block;
       margin-bottom: 10px;
     }
-    .returning-info {
-      line-height: 1.65;
-      margin-bottom: 12px;
-      font-size: 0.98rem;
+
+    .upcoming-time, .returning-time, .overdue-time {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .overdue-time { color: #dc2626; }
+
+    .remain-money {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #ea580c;
     }
 
     @media (max-width: 600px) {
-      body { padding: 10px; padding-bottom: 130px; }
+      body { padding: 10px; padding-bottom: 140px; }
       h1 { font-size: 2.2rem; }
       .fab { width: 55px; height: 55px; bottom: 20px; right: 20px; }
       .action-buttons { bottom: 20px; right: 88px; gap: 10px; }
       .action-btn { width: 48px; height: 48px; font-size: 1.25rem; }
-      .upcoming-grid, .returning-grid { grid-template-columns: 1fr; }
+      .section-grid { grid-template-columns: 1fr; }
     }
 
     @media print {
@@ -564,23 +558,32 @@
 
     <!-- Nhận xe sắp tới -->
     <div id="upcomingSection" class="upcoming-section" style="display: none;">
-      <div class="upcoming-header">
+      <div class="section-header upcoming-header">
         <i class="fas fa-clock" style="font-size:1.7rem;"></i>
         <h2>Nhận xe sắp tới <small style="color:#64748b; font-weight:normal;">(hôm nay & ngày mai)</small></h2>
       </div>
-      <div id="upcomingGrid" class="upcoming-grid"></div>
+      <div id="upcomingGrid" class="section-grid"></div>
     </div>
 
-    <!-- Xe đến hạn trả (mới) -->
+    <!-- Xe đến hạn trả -->
     <div id="returningSection" class="returning-section" style="display: none;">
-      <div class="returning-header">
+      <div class="section-header returning-header">
         <i class="fas fa-clock" style="font-size:1.7rem;"></i>
         <h2>Xe đến hạn trả <small style="color:#64748b; font-weight:normal;">(hôm nay & ngày mai)</small></h2>
       </div>
-      <div id="returningGrid" class="returning-grid"></div>
+      <div id="returningGrid" class="section-grid"></div>
     </div>
 
-    <!-- Tab 0 -->
+    <!-- Xe quá hạn trả -->
+    <div id="overdueSection" class="overdue-section" style="display: none;">
+      <div class="section-header overdue-header">
+        <i class="fas fa-exclamation-triangle" style="font-size:1.7rem;"></i>
+        <h2>Xe quá hạn trả <small style="color:#64748b; font-weight:normal;">(đã quá ngày trả)</small></h2>
+      </div>
+      <div id="overdueGrid" class="section-grid"></div>
+    </div>
+
+    <!-- Tab 0: Hợp đồng đang xử lý -->
     <div id="tab0" class="card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
         <h2><i class="fas fa-list"></i> Danh sách hợp đồng đang xử lý</h2>
@@ -868,7 +871,7 @@
         <h2 id="noteModalTitle">Ghi chú hợp đồng</h2>
         <span class="close" onclick="closeNoteModal()">×</span>
       </div>
-      <textarea id="noteText" rows="6" style="width:100%; resize:vertical;" placeholder="Nhập ghi chú..."></textarea>
+      <textarea id="noteText" rows="6" style="width:100%; resize:vertical;" placeholder="Nhập ghi chú cho hợp đồng đang xử lý..."></textarea>
       <input type="hidden" id="noteContractId">
       <div style="margin-top:20px; display:flex; gap:12px;">
         <button onclick="closeNoteModal()" class="btn btn-secondary" style="flex:1;">Huỷ</button>
@@ -884,11 +887,11 @@
         <h2 id="historyNoteModalTitle">Ghi chú lịch sử</h2>
         <span class="close" onclick="closeHistoryNoteModal()">×</span>
       </div>
-      <textarea id="historyNoteText" rows="6" style="width:100%; resize:vertical;" placeholder="Nhập ghi chú..."></textarea>
+      <textarea id="historyNoteText" rows="6" style="width:100%; resize:vertical;" placeholder="Nhập ghi chú cho hợp đồng đã hoàn tất..."></textarea>
       <input type="hidden" id="historyNoteContractId">
       <div style="margin-top:20px; display:flex; gap:12px;">
         <button onclick="closeHistoryNoteModal()" class="btn btn-secondary" style="flex:1;">Huỷ</button>
-        <button onclick="saveHistoryNote()" class="btn btn-primary" style="flex:1;">Lưu ghi chú</button>
+        <button onclick="saveHistoryNote()" class="btn btn-primary" style="flex:1;">Lưu ghi chú lịch sử</button>
       </div>
     </div>
   </div>
@@ -1051,7 +1054,7 @@
       setTimeout(() => toast.style.display = 'none', 4000);
     }
 
-    // ====================== CUSTOMER HISTORY ======================
+    // ====================== TỰ ĐIỀN KHÁCH HÀNG ======================
     let customerHistory = {};
 
     function buildCustomerHistory() {
@@ -1113,7 +1116,7 @@
       }
     }
 
-    // ====================== LOAD & SAVE ======================
+    // ====================== LOAD & SAVE DATA ======================
     async function loadData() {
       try {
         const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
@@ -1233,7 +1236,7 @@
       };
     }
 
-    // ====================== CONFIRM ======================
+    // ====================== XÁC NHẬN ======================
     function showConfirm(title, message, icon, callback) {
       document.getElementById('confirmTitle').textContent = title;
       document.getElementById('confirmMessage').innerHTML = message;
@@ -1266,7 +1269,7 @@
       document.getElementById('customPriceSection').classList.toggle('show', type === 'app');
     }
 
-    // ====================== NOTES ======================
+    // ====================== GHI CHÚ ======================
     function openActiveNoteModal(id) {
       const contract = contracts.find(c => c.id === id);
       if (!contract) return;
@@ -1317,7 +1320,7 @@
       document.getElementById('historyNoteModal').style.display = 'none';
     }
 
-    // ====================== ACTION POPUP ======================
+    // ====================== POP-UP HÀNH ĐỘNG ======================
     function showActionPopup(id) {
       currentActionContractId = id;
       const contract = contracts.find(c => c.id === id);
@@ -1388,7 +1391,7 @@
       deleteContract(id);
     }
 
-    // ====================== CALENDAR ======================
+    // ====================== LỊCH XE ======================
     function renderCalendar(carId) {
       currentScheduleCarId = carId;
       const booked = new Set();
@@ -1510,7 +1513,7 @@
       container.appendChild(row);
     }
 
-    // ====================== UPCOMING (Nhận xe sắp tới) ======================
+    // ====================== NHẬN XE SẮP TỚI ======================
     function getRealReceiveDate(contract) {
       let date = new Date(contract.rentDate);
       if (contract.rentDayType === "homtruoc") {
@@ -1605,7 +1608,7 @@
       confirmReceive(id);
     }
 
-    // ====================== RETURNING - XE ĐẾN HẠN TRẢ (v1.2.8) ======================
+    // ====================== XE ĐẾN HẠN TRẢ ======================
     function getReturningContracts() {
       const today = new Date();
       today.setHours(0,0,0,0);
@@ -1685,6 +1688,67 @@
           <button onclick="quickReturnContract(${contract.id}); event.stopImmediatePropagation();" 
                   class="btn btn-info" style="width:100%; padding:14px;">
             <i class="fas fa-undo"></i> Trả xe ngay
+          </button>
+        `;
+        grid.appendChild(div);
+      });
+    }
+
+    // ====================== XE QUÁ HẠN TRẢ (MỚI) ======================
+    function getOverdueContracts() {
+      const today = new Date();
+      today.setHours(0,0,0,0);
+
+      return contracts
+        .filter(c => c.status === "Đang thuê")
+        .filter(c => {
+          const returnDate = new Date(c.returnDate);
+          returnDate.setHours(0,0,0,0);
+          return returnDate < today;
+        })
+        .sort((a, b) => new Date(a.returnDate) - new Date(b.returnDate));
+    }
+
+    function renderOverdueSection() {
+      const container = document.getElementById('overdueSection');
+      const grid = document.getElementById('overdueGrid');
+      grid.innerHTML = '';
+
+      const overdue = getOverdueContracts();
+
+      if (overdue.length === 0) {
+        container.style.display = 'none';
+        return;
+      }
+
+      container.style.display = 'block';
+
+      overdue.forEach(contract => {
+        const remain = calculateRemaining(contract);
+        const daysLate = Math.ceil((new Date() - new Date(contract.returnDate)) / 86400000);
+
+        const div = document.createElement('div');
+        div.className = 'overdue-card';
+        div.innerHTML = `
+          <div class="overdue-badge">QUÁ HẠN TRẢ XE (${daysLate} ngày)</div>
+          <div class="overdue-time">
+            <i class="fas fa-clock"></i> Trả dự kiến: ${formatDate(contract.returnDate)} ${contract.returnTime || '20:00'}
+          </div>
+          <div class="returning-info">
+            <strong onclick="showActionPopup(${contract.id}); event.stopImmediatePropagation();" 
+                    style="cursor:pointer; color:#1f2937;">
+              ${contract.customer}
+            </strong><br>
+            🚗 ${contract.carType} - ${contract.plate}
+          </div>
+          <div style="margin:12px 0 16px 0;">
+            <span style="font-size:1.15rem; font-weight:700; color:#dc2626;">
+              Còn phải thu: ${formatMoney(remain)} ₫
+            </span>
+          </div>
+          <button onclick="quickReturnContract(${contract.id}); event.stopImmediatePropagation();" 
+                  class="btn btn-danger" style="width:100%; padding:14px;">
+            <i class="fas fa-undo"></i> Trả xe ngay (Quá hạn)
           </button>
         `;
         grid.appendChild(div);
@@ -1982,6 +2046,7 @@
       renderCompletedContracts();
       renderUpcomingSection();
       renderReturningSection();
+      renderOverdueSection();
     }
 
     function switchTab(tab) {
@@ -1991,7 +2056,7 @@
       document.getElementById('tab2').style.display = tab===2 ? 'block' : 'none';
     }
 
-    // ====================== MODALS ======================
+    // ====================== MODAL & FORM ======================
     function showAddContractModal() {
       document.getElementById('contractModalTitle').textContent = "Thêm hợp đồng thuê xe";
       document.getElementById('contractSubmitBtn').textContent = "Lưu hợp đồng";
@@ -2356,7 +2421,7 @@
         if (e.target === this) closeActionPopup();
       });
 
-      console.log("🚀 CarRent v1.2.8 - Đã thêm phần Xe đến hạn trả thành công!");
+      console.log("🚀 CarRent v1.2.8 - Đã thêm phần Xe quá hạn trả với mác đỏ rõ ràng!");
     };
 
     function formatPriceInput(e) {
