@@ -551,7 +551,7 @@
       <div id="returningSection" class="dashboard-section" style="display: none;">
         <div class="section-header returning-header">
           <i class="fas fa-clock" style="font-size:1.7rem;"></i>
-          <h3>Xe đến hạn trả <small style="color:#64748b; font-weight:normal;">(hôm nay & quá hạn)</small></h3>
+          <h3>Xe đến hạn trả <small style="color:#64748b; font-weight:normal;"></small></h3>
         </div>
         <div id="returningGrid" class="section-grid"></div>
       </div>
@@ -1521,7 +1521,7 @@ function renderUpcomingSection() {
     div.className = 'upcoming-card';
     div.innerHTML = `
       <div class="upcoming-time">
-        <i class="fas fa-clock"></i> Hôm nay - ${displayDate} ${contract.rentTime || '08:00'}
+        Hôm nay - ${displayDate} ${contract.rentTime || '08:00'}
       </div>
       <div>
         <strong>${contract.customer}</strong><br>
@@ -1617,13 +1617,14 @@ function renderReturningSection() {
     div.innerHTML = `
       ${overdueTag}
       <div class="returning-time">
-        <i class="fas fa-clock"></i> ${display.fullDisplay}
+       </i> ${display.fullDisplay}
       </div>
       <div class="returning-info">
         <strong onclick="showActionPopup(${contract.id}); event.stopImmediatePropagation();" 
                 style="cursor:pointer; color:#1f2937;">
           ${contract.customer}
         </strong><br>
+        📱 ${contract.phone}<br>
         🚗 ${contract.carType} - ${contract.plate}
       </div>
       <div style="margin:12px 0 16px 0;">
