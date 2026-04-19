@@ -88,7 +88,7 @@
 
     table {
       width: 100%;
-      min-width: 1450px;
+      min-width: 1600px;
       border-collapse: collapse;
     }
     th, td {
@@ -103,15 +103,11 @@
       font-weight: 600;
     }
 
-    /* Màu nền theo trạng thái */
-    tr.waiting-today { background: #dbeafe !important; }   /* Xanh dương - chờ nhận hôm nay */
-    tr.due-today     { background: #fef3c7 !important; }   /* Vàng - đến hạn trả hôm nay */
-    tr.overdue       { background: #fee2e2 !important; }   /* Đỏ - quá hạn trả */
+    tr.waiting-today { background: #dbeafe !important; }
+    tr.due-today     { background: #fef3c7 !important; }
+    tr.overdue       { background: #fee2e2 !important; }
 
-    tr:hover { 
-      background: #f1f5f9 !important; 
-      cursor: pointer; 
-    }
+    tr:hover { background: #f1f5f9 !important; cursor: pointer; }
 
     .status {
       padding: 6px 12px;
@@ -478,7 +474,7 @@
       <div class="tab" onclick="switchTab(2)">📊 Lịch sử & Doanh thu</div>
     </div>
 
-    <!-- Tab 0: Hợp đồng đang xử lý -->
+    <!-- Tab 0 -->
     <div id="tab0" class="card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
         <h2><i class="fas fa-list"></i> Danh sách hợp đồng đang xử lý</h2>
@@ -673,9 +669,9 @@
 
         <div class="form-grid">
           <div><label>Ngày bắt đầu thuê</label><input type="date" id="rentDate" required></div>
-          <div><label>Thời gian nhận xe </label><input type="time" id="rentTime" value="08:00"></div>
+          <div><label>Thời gian nhận xe</label><input type="time" id="rentTime" value="08:00"></div>
           <div><label>Ngày trả xe</label><input type="date" id="returnDate" required></div>
-          <div><label>Thời gian trả xe </label><input type="time" id="returnTime" value="20:00"></div>
+          <div><label>Thời gian trả xe</label><input type="time" id="returnTime" value="20:00"></div>
         </div>
 
         <div style="margin-bottom: 20px;">
@@ -684,6 +680,27 @@
             <option value="cungngay" selected>Cùng ngày</option>
             <option value="homtruoc">Tối hôm trước</option>
           </select>
+        </div>
+
+        <!-- NỬA NGÀY -->
+        <div style="margin: 15px 0 20px 0; background:#f8fafc; padding:15px; border-radius:12px;">
+          <label style="display:block; margin-bottom:10px; font-weight:600; color:#475569;">Loại ngày tính giá</label>
+          <div class="form-grid">
+            <div>
+              <label>Ngày bắt đầu thuê</label>
+              <select id="rentHalf">
+                <option value="full" selected>Toàn ngày</option>
+                <option value="half">Nửa ngày đầu (50% giá)</option>
+              </select>
+            </div>
+            <div>
+              <label>Ngày trả xe</label>
+              <select id="returnHalf">
+                <option value="full" selected>Toàn ngày</option>
+                <option value="half">Nửa ngày cuối (50% giá)</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         <div class="custom-price" id="customPriceSection">
@@ -735,7 +752,6 @@
         <h2 id="popupContractTitle" class="action-popup-title"></h2>
         <div id="popupContractInfo" class="action-popup-info"></div>
       </div>
-
       <div class="action-buttons-grid">
         <button onclick="editFromPopup()" class="btn btn-edit" style="width:100%; justify-content:center;">
           <i class="fas fa-edit"></i> Sửa hợp đồng
@@ -897,7 +913,7 @@
   </div>
 
   <div class="version">
-    CarRent v1.3.0 (2026)
+    CarRent v1.3.1 (2026)
   </div>
 
 <script>
@@ -1055,10 +1071,21 @@ function calculateRentalTotal(contract) {
   let total = 0;
   let cur = new Date(contract.rentDate);
   const end = new Date(contract.returnDate);
+  const startDateObj = new Date(contract.rentDate);
+  const endDateObj = new Date(contract.returnDate);
+
   while (cur <= end) {
     const ds = cur.toISOString().split('T')[0];
     let price = isHoliday(ds) ? car.holiday : (getDayType(ds) === "weekend" ? car.weekend : car.daily);
-    total += price;
+
+    let multiplier = 1;
+    const isFirstDay = cur.getTime() === startDateObj.getTime();
+    const isLastDay = cur.getTime() === endDateObj.getTime();
+
+    if (isFirstDay && (contract.rentHalf || 'full') === 'half') multiplier = 0.5;
+    if (isLastDay && (contract.returnHalf || 'full') === 'half') multiplier = 0.5;
+
+    total += price * multiplier;
     cur.setDate(cur.getDate() + 1);
   }
   return total;
@@ -1092,6 +1119,8 @@ function freezeContract(contract) {
     rentTime: contract.rentTime,
     returnTime: contract.returnTime,
     rentDayType: contract.rentDayType,
+    rentHalf: contract.rentHalf || 'full',
+    returnHalf: contract.returnHalf || 'full',
     deposit: contract.deposit,
     discount: contract.discount || 0,
     extraFees: JSON.parse(JSON.stringify(contract.extraFees || [])),
@@ -1115,6 +1144,8 @@ function getCompletedDisplay(con) {
     rentTime: con.rentTime,
     returnTime: con.returnTime,
     rentDayType: con.rentDayType,
+    rentHalf: con.rentHalf || 'full',
+    returnHalf: con.returnHalf || 'full',
     deposit: con.deposit,
     discount: con.discount || 0,
     extraFees: con.extraFees || [],
@@ -1217,11 +1248,14 @@ function showActionPopup(id) {
 
   document.getElementById('popupContractTitle').textContent = contract.customer;
 
+  const rentHalfText = (contract.rentHalf || 'full') === 'half' ? '<span style="color:#d97706;"> (½ ngày đầu)</span>' : '';
+  const returnHalfText = (contract.returnHalf || 'full') === 'half' ? '<span style="color:#d97706;"> (½ ngày cuối)</span>' : '';
+
   let infoHTML = `
     <strong>Xe:</strong> ${contract.carType} - ${contract.plate}<br>
     <strong>Nhận:</strong> ${formatDate(contract.rentDate)} ${contract.rentTime || ''} 
-    ${contract.rentDayType === "homtruoc" ? '(tối hôm trước)' : ''}<br>
-    <strong>Trả:</strong> ${formatDate(contract.returnDate)} ${contract.returnTime || ''}<br>
+    ${contract.rentDayType === "homtruoc" ? '(tối hôm trước)' : ''}${rentHalfText}<br>
+    <strong>Trả:</strong> ${formatDate(contract.returnDate)} ${contract.returnTime || ''}${returnHalfText}<br>
     <strong>Tổng tiền:</strong> <span style="color:#16a34a;font-weight:600;">${formatMoney(calculateTotal(contract))} ₫</span><br>
     <strong>Cọc:</strong> ${formatMoney(contract.deposit || 0)} ₫ | 
     <strong>Còn lại:</strong> <span style="color:${calculateRemaining(contract) === 0 ? '#16a34a' : '#ea580c'};">${formatMoney(calculateRemaining(contract))} ₫</span>
@@ -1402,7 +1436,7 @@ function addExtraFeeField() {
   container.appendChild(row);
 }
 
-// ====================== LOGIC NGÀY (giữ nguyên v1.2.9) ======================
+// ====================== LOGIC NGÀY ======================
 function getRealReceiveDate(contract) {
   let date = new Date(contract.rentDate);
   if (contract.rentDayType === "homtruoc") {
@@ -1435,7 +1469,7 @@ function isOverdue(contract) {
   return retDate.getTime() < today.getTime() && contract.status === "Đang thuê";
 }
 
-// ====================== RENDER ACTIVE CONTRACTS ======================
+// ====================== RENDER ======================
 function renderActiveContracts() {
   const tbody = document.getElementById('activeContractBody');
   tbody.innerHTML = '';
@@ -1475,11 +1509,14 @@ function renderActiveContracts() {
     if (extra > 0) totalHTML += `<div class="note">+ Phụ phí: ${formatMoney(extra)} ₫</div>`;
     if (discountAmt > 0) totalHTML += `<div class="note">- Giảm giá: ${formatMoney(discountAmt)} ₫</div>`;
 
-    const rentNote = contract.rentDayType === "homtruoc" 
-      ? `<small class="note">Nhận: ${contract.rentTime} (tối hôm trước)</small>` 
-      : `<small class="note">Nhận: ${contract.rentTime}</small>`;
+    const rentHalfText = (contract.rentHalf || 'full') === 'half' ? ' <small style="color:#d97706;">(½ ngày đầu)</small>' : '';
+    const returnHalfText = (contract.returnHalf || 'full') === 'half' ? ' <small style="color:#d97706;">(½ ngày cuối)</small>' : '';
 
-    const returnNote = `<small class="note">Trả: ${contract.returnTime}</small>`;
+    const rentNote = contract.rentDayType === "homtruoc" 
+      ? `<small class="note">Nhận: ${contract.rentTime} (tối hôm trước)${rentHalfText}</small>` 
+      : `<small class="note">Nhận: ${contract.rentTime}${rentHalfText}</small>`;
+
+    const returnNote = `<small class="note">Trả: ${contract.returnTime}${returnHalfText}</small>`;
 
     const noteShort = contract.activeNote 
       ? (contract.activeNote.length > 30 ? contract.activeNote.substring(0,30) + '...' : contract.activeNote) 
@@ -1489,9 +1526,8 @@ function renderActiveContracts() {
     tr.onclick = () => showActionPopup(contract.id);
 
     let rowClass = '';
-    if (contract.status === "Chưa nhận xe" && isReceiveToday(contract)) {
-      rowClass = 'waiting-today';
-    } else if (contract.status === "Đang thuê") {
+    if (contract.status === "Chưa nhận xe" && isReceiveToday(contract)) rowClass = 'waiting-today';
+    else if (contract.status === "Đang thuê") {
       if (isOverdue(contract)) rowClass = 'overdue';
       else if (isReturnToday(contract)) rowClass = 'due-today';
     }
@@ -1617,6 +1653,9 @@ function renderCompletedContracts() {
     const typeLabel = d.contractType === 'app' ? 'Đặt qua app' : 'Thuê thường';
     const noteShort = contract.historyNote ? (contract.historyNote.length > 40 ? contract.historyNote.substring(0,40) + '...' : contract.historyNote) : '<small style="color:#94a3b8;">—</small>';
 
+    const rentHalfText = (d.rentHalf || 'full') === 'half' ? ' (½ ngày đầu)' : '';
+    const returnHalfText = (d.returnHalf || 'full') === 'half' ? ' (½ ngày cuối)' : '';
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><strong>${d.customer || ''}</strong></td>
@@ -1624,8 +1663,8 @@ function renderCompletedContracts() {
       <td>${d.carType || ''}</td>
       <td><strong>${d.plate || ''}</strong></td>
       <td>${typeLabel}</td>
-      <td>${formatDate(d.rentDate)} ${d.rentTime || ''}</td>
-      <td>${formatDate(d.returnDate)} ${d.returnTime || ''}</td>
+      <td>${formatDate(d.rentDate)} ${d.rentTime || ''}${rentHalfText}</td>
+      <td>${formatDate(d.returnDate)} ${d.returnTime || ''}${returnHalfText}</td>
       <td>${calculateDays(d.rentDate, d.returnDate)}</td>
       <td style="text-align:right;">${formatMoney(d.rentalAmount)} ₫</td>
       <td style="text-align:right;">${formatMoney(d.extraFees.reduce((s,f)=>s+(f.amount||0),0))} ₫</td>
@@ -1695,6 +1734,8 @@ function printRevenue() {
 
   filtered.forEach(con => {
     const d = getCompletedDisplay(con);
+    const rentHalfText = (d.rentHalf || 'full') === 'half' ? ' (½ ngày đầu)' : '';
+    const returnHalfText = (d.returnHalf || 'full') === 'half' ? ' (½ ngày cuối)' : '';
     html += `
       <tr>
         <td>${d.customer || ''}</td>
@@ -1702,8 +1743,8 @@ function printRevenue() {
         <td>${d.carType || ''}</td>
         <td>${d.plate || ''}</td>
         <td>${d.contractType === 'app' ? 'Đặt qua app' : 'Thuê thường'}</td>
-        <td>${formatDate(d.rentDate)} ${d.rentTime || ''}</td>
-        <td>${formatDate(d.returnDate)} ${d.returnTime || ''}</td>
+        <td>${formatDate(d.rentDate)} ${d.rentTime || ''}${rentHalfText}</td>
+        <td>${formatDate(d.returnDate)} ${d.returnTime || ''}${returnHalfText}</td>
         <td style="text-align:center;">${calculateDays(d.rentDate, d.returnDate)}</td>
         <td style="text-align:right;">${formatMoney(d.rentalAmount)} ₫</td>
         <td style="text-align:right;">${formatMoney(d.extraFees.reduce((s,f)=>s+(f.amount||0),0))} ₫</td>
@@ -1737,7 +1778,7 @@ function switchTab(tab) {
   document.getElementById('tab2').style.display = tab===2 ? 'block' : 'none';
 }
 
-// ====================== MODAL & FORM ======================
+// ====================== MODAL FUNCTIONS ======================
 function showAddContractModal() {
   document.getElementById('contractModalTitle').textContent = "Thêm hợp đồng thuê xe";
   document.getElementById('contractSubmitBtn').textContent = "Lưu hợp đồng";
@@ -1749,6 +1790,8 @@ function showAddContractModal() {
   document.getElementById('returnTime').value = '20:00';
   document.getElementById('rentDayType').value = 'cungngay';
   document.getElementById('discount').value = '0';
+  document.getElementById('rentHalf').value = 'full';
+  document.getElementById('returnHalf').value = 'full';
 
   setContractType('normal');
 
@@ -1813,6 +1856,8 @@ function editContract(id) {
   document.getElementById('rentTime').value = contract.rentTime || '08:00';
   document.getElementById('returnTime').value = contract.returnTime || '20:00';
   document.getElementById('rentDayType').value = contract.rentDayType || 'cungngay';
+  document.getElementById('rentHalf').value = contract.rentHalf || 'full';
+  document.getElementById('returnHalf').value = contract.returnHalf || 'full';
   document.getElementById('status').value = contract.status || 'Chưa nhận xe';
 
   document.getElementById('deposit').value = contract.deposit || 0;
@@ -1937,6 +1982,8 @@ document.getElementById('contractForm').addEventListener('submit', e => {
   const rentTime = document.getElementById('rentTime').value;
   const returnTime = document.getElementById('returnTime').value;
   const rentDayType = document.getElementById('rentDayType').value;
+  const rentHalf = document.getElementById('rentHalf').value;
+  const returnHalf = document.getElementById('returnHalf').value;
   const discount = parseMoney(document.getElementById('discount').value);
   const customTotalPrice = parseMoney(document.getElementById('customTotalPrice').value);
 
@@ -1961,6 +2008,8 @@ document.getElementById('contractForm').addEventListener('submit', e => {
       contract.rentTime = rentTime;
       contract.returnTime = returnTime;
       contract.rentDayType = rentDayType;
+      contract.rentHalf = rentHalf;
+      contract.returnHalf = returnHalf;
       contract.deposit = parseMoney(document.getElementById('deposit').value);
       contract.discount = discount;
       contract.extraFees = extraFees;
@@ -1982,6 +2031,8 @@ document.getElementById('contractForm').addEventListener('submit', e => {
       rentTime: rentTime,
       returnTime: returnTime,
       rentDayType: rentDayType,
+      rentHalf: rentHalf,
+      returnHalf: returnHalf,
       deposit: parseMoney(document.getElementById('deposit').value),
       discount: discount,
       extraFees,
@@ -2038,6 +2089,8 @@ window.onload = async () => {
       c.customTotalPrice = c.customDailyPrice * calculateDays(c.rentDate, c.returnDate);
       migrated = true;
     }
+    if (!c.rentHalf) { c.rentHalf = 'full'; migrated = true; }
+    if (!c.returnHalf) { c.returnHalf = 'full'; migrated = true; }
     if (c.status === "Đã hoàn tất") {
       if (!c.frozenData) { freezeContract(c); migrated = true; }
       if (c.note && !c.historyNote) { c.historyNote = c.note; migrated = true; }
@@ -2096,7 +2149,7 @@ window.onload = async () => {
     if (e.target === this) closeActionPopup();
   });
 
-  console.log("🚀 CarRent v1.3.0 - Đã bỏ dashboard và áp dụng màu nền theo yêu cầu!");
+  console.log("🚀 CarRent v1.3.1 - Đã hỗ trợ nửa ngày đầu / nửa ngày cuối!");
 };
 
 function formatPriceInput(e) {
