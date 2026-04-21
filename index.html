@@ -1006,19 +1006,23 @@ function updateCustomerDatalists() {
 }
 
 function autoFillFromPhone() {
-  const phone = document.getElementById('phone').value.trim();
-  if (phone && customerHistory[phone]) {
-    document.getElementById('customerName').value = customerHistory[phone].name;
-  }
+  const phoneInput = document.getElementById('phone').value.trim();
+  if (!phoneInput || !customerHistory[phoneInput]) return;
+  
+  // Chỉ điền khi khớp chính xác 100%
+  document.getElementById('customerName').value = customerHistory[phoneInput].name;
 }
 
 function autoFillFromName() {
   const nameInput = document.getElementById('customerName').value.trim();
   if (!nameInput) return;
-  const lowerName = nameInput.toLowerCase();
-  const matches = Object.entries(customerHistory).filter(([_, data]) => data.name.toLowerCase().includes(lowerName));
-  if (matches.length === 1) {
-    document.getElementById('phone').value = matches[0][0];
+
+  // Tìm exact match (khớp chính xác tên)
+  for (const [phone, data] of Object.entries(customerHistory)) {
+    if (data.name === nameInput) {   // === thay vì includes
+      document.getElementById('phone').value = phone;
+      return;
+    }
   }
 }
 
