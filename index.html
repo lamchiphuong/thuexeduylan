@@ -1961,16 +1961,26 @@ function editCar(id) {
 }
 
 function deleteCar(id) {
-  showSimpleConfirm("Xóa xe", "Bạn có chắc muốn xóa xe này?<br><strong>Chỉ xóa được khi xe không có hợp đồng nào.</strong>", () => {
-    if (contracts.some(c => cars.find(v => v.id === id)?.plate === c.plate)) {
-      alert("Không thể xóa xe đang có hợp đồng!");
-      return;
-    }
-    cars = cars.filter(c => c.id !== id);
-    renderAll();
-    saveData();
-    showToast("Xe đã được xóa.");
-  });
+  const car = cars.find(c => c.id === id);
+  if (!car) return;
+
+  const activeContracts = contracts.filter(c => 
+    c.plate === car.plate && c.status !== "Đã hoàn tất"
+  );
+
+  if (activeContracts.length > 0) {
+    alert(`Không thể xóa xe này vì đang có ${activeContracts.length} hợp đồng đang xử lý!`);
+    return;
+  }
+
+  showSimpleConfirm("Xóa xe", 
+    `Bạn có chắc muốn xóa xe <strong>${car.type} - ${car.plate}</strong>?<br><strong>Hành động này không thể hoàn tác.</strong>`, 
+    () => {
+      cars = cars.filter(c => c.id !== id);
+      renderAll();
+      saveData();
+      showToast("Xe đã được xóa.");
+    });
 }
 
 // ====================== FORM SUBMIT ======================
@@ -2054,30 +2064,87 @@ document.getElementById('contractForm').addEventListener('submit', e => {
   saveData();
 });
 
+// ====================== FORM XE SUBMIT (ĐÃ SỬA - HỖ TRỢ ĐỔI BIỂN SỐ) ======================
 document.getElementById('carForm').addEventListener('submit', e => {
   e.preventDefault();
+
   const carId = document.getElementById('carId').value ? parseInt(document.getElementById('carId').value) : null;
+  const newPlate = document.getElementById('licensePlate').value.trim().toUpperCase();
+  const newType = document.getElementById('carType').value.trim();
+
+  if (!newPlate || !newType) {
+    alert("Vui lòng nhập đầy đủ loại xe và biển số!");
+    return;
+  }
+
   if (carId) {
+    // === SỬA XE ===
     const car = cars.find(c => c.id === carId);
-    if (car) {
-      car.type = document.getElementById('carType').value;
-      car.plate = document.getElementById('licensePlate').value;
-      car.daily = parseMoney(document.getElementById('dailyPrice').value);
-      car.weekend = parseMoney(document.getElementById('weekendPrice').value);
-      car.holiday = parseMoney(document.getElementById('holidayPrice').value);
+    if (!car) return;
+
+    const oldPlate = car.plate;
+
+    // Kiểm tra biển số mới đã tồn tại chưa (trừ chính xe này)
+    const existingCar = cars.find(c => c.plate === newPlate && c.id !== carId);
+    if (existingCar) {
+      alert(`Biển số ${newPlate} đã tồn tại trên xe khác!`);
+      return;
     }
-    showToast('Thông tin xe đã được cập nhật!');
+
+    // Kiểm tra xe có hợp đồng đang xử lý không
+    const activeContracts = contracts.filter(c => 
+      c.plate === oldPlate && c.status !== "Đã hoàn tất"
+    );
+
+    if (activeContracts.length > 0) {
+      const confirmMsg = `Xe "${car.type} - ${oldPlate}" đang có ${activeContracts.length} hợp đồng đang xử lý.\n\n` +
+                        `Bạn có chắc muốn đổi biển số sang "${newPlate}"?\n` +
+                        `Tất cả hợp đồng sẽ được tự động cập nhật theo biển số mới.`;
+      
+      if (!confirm(confirmMsg)) {
+        return;
+      }
+    }
+
+    // === THỰC HIỆN CẬP NHẬT & ĐỒNG BỘ ===
+    // 1. Cập nhật thông tin xe
+    car.type = newType;
+    car.plate = newPlate;
+    car.daily = parseMoney(document.getElementById('dailyPrice').value);
+    car.weekend = parseMoney(document.getElementById('weekendPrice').value);
+    car.holiday = parseMoney(document.getElementById('holidayPrice').value);
+
+    // 2. Đồng bộ biển số và loại xe vào tất cả hợp đồng (kể cả đã hoàn tất)
+    let updatedCount = 0;
+    contracts.forEach(contract => {
+      if (contract.plate === oldPlate) {
+        contract.plate = newPlate;
+        contract.carType = newType;        // đồng bộ luôn loại xe cho nhất quán
+        updatedCount++;
+      }
+    });
+
+    showToast(`Đã cập nhật xe và đồng bộ ${updatedCount} hợp đồng sang biển số mới: ${newPlate}`);
+
   } else {
+    // === THÊM XE MỚI ===
+    // Kiểm tra biển số trùng
+    if (cars.some(c => c.plate === newPlate)) {
+      alert(`Biển số ${newPlate} đã tồn tại!`);
+      return;
+    }
+
     cars.push({
       id: Date.now(),
-      type: document.getElementById('carType').value,
-      plate: document.getElementById('licensePlate').value,
+      type: newType,
+      plate: newPlate,
       daily: parseMoney(document.getElementById('dailyPrice').value),
       weekend: parseMoney(document.getElementById('weekendPrice').value),
       holiday: parseMoney(document.getElementById('holidayPrice').value)
     });
-    showToast('Xe mới đã được thêm!');
+    showToast('Xe mới đã được thêm thành công!');
   }
+
   renderAll();
   closeCarModal();
   saveData();
