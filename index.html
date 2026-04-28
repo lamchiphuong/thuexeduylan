@@ -459,6 +459,82 @@
       #tab2 { display: block !important; box-shadow: none; }
       .table-container { overflow: visible; }
     }
+    /* ==================== CAR GRID - MOBILE FRIENDLY ==================== */
+.car-grid {
+  padding: 8px 0;
+}
+
+.car-card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+  border: 1px solid #e2e8f0;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.car-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(37,99,235,0.15);
+  border-color: var(--primary);
+}
+
+.car-card .car-icon {
+  font-size: 3.2rem;
+  color: var(--primary);
+  margin-bottom: 12px;
+  text-align: center;
+  display: block;
+}
+
+.car-card h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.25rem;
+  color: #1e40af;
+}
+
+.car-card .plate {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #334155;
+  background: #f1f5f9;
+  padding: 6px 12px;
+  border-radius: 12px;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.car-card .status {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.car-popup-content {
+  text-align: center;
+}
+
+.car-popup-content .price-info {
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 16px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.car-popup-content .price-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+}
+
+.car-popup-content .price-row:last-child {
+  margin-bottom: 0;
+}
   </style>
 </head>
 <body>
@@ -517,31 +593,20 @@
     </div>
 
     <!-- Tab 1 -->
-    <div id="tab1" class="card" style="display: none;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2><i class="fas fa-car-side"></i> Danh sách xe</h2>
-        <button class="btn btn-success" onclick="showAddCarModal()">
-          <i class="fas fa-plus"></i> Thêm xe mới
-        </button>
-      </div>
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Loại xe</th>
-              <th>Biển số</th>
-              <th>Trạng thái xe</th>
-              <th>Giá ngày thường</th>
-              <th>Giá cuối tuần</th>
-              <th>Giá lễ/Tết</th>
-              <th>Lịch xe</th>
-              <th>Hành động</th>
-            </tr>
-          </thead>
-          <tbody id="carBody"></tbody>
-        </table>
-      </div>
-    </div>
+<!-- Tab 1 - Quản lý xe (Phiên bản Mobile Friendly) -->
+<div id="tab1" class="card" style="display: none;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+    <h2><i class="fas fa-car-side"></i> Danh sách xe</h2>
+    <button class="btn btn-success" onclick="showAddCarModal()">
+      <i class="fas fa-plus"></i> Thêm xe mới
+    </button>
+  </div>
+
+  <!-- Grid xe cho mobile -->
+  <div id="carGrid" class="car-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+    <!-- JS sẽ render vào đây -->
+  </div>
+</div>
 
     <!-- Tab 2 -->
     <div id="tab2" class="card" style="display: none;">
@@ -913,7 +978,7 @@
   </div>
 
   <div class="version">
-    CarRent v1.3.1 (2026)
+    CarRent v1.3.2 (2026)
   </div>
 
 <script>
@@ -1556,29 +1621,117 @@ function renderActiveContracts() {
 }
 
 function renderCars() {
-  const tbody = document.getElementById('carBody');
-  tbody.innerHTML = '';
+  const container = document.getElementById('carGrid');
+  container.innerHTML = '';
+
   cars.forEach(car => {
     const busy = contracts.some(c => c.plate === car.plate && c.status !== "Đã hoàn tất");
-    const statusHTML = busy ? `<span class="status busy">Đang có lịch</span>` : `<span class="status available">Đang rảnh</span>`;
+    const statusHTML = busy 
+      ? `<span class="status busy">Đang có lịch</span>` 
+      : `<span class="status available">Đang rảnh</span>`;
 
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${car.type}</td>
-      <td><strong>${car.plate}</strong></td>
-      <td>${statusHTML}</td>
-      <td>${formatMoney(car.daily)} ₫</td>
-      <td>${formatMoney(car.weekend)} ₫</td>
-      <td>${formatMoney(car.holiday)} ₫</td>
-      <td><button onclick="showCarSchedule(${car.id}); event.stopImmediatePropagation();" class="btn btn-info" style="padding:8px 16px;font-size:0.9rem;">📅 Xem lịch</button></td>
-      <td style="display:flex; gap:6px;">
-        <button onclick="editCar(${car.id}); event.stopImmediatePropagation();" class="btn btn-edit" style="padding:8px 12px;"><i class="fas fa-edit"></i></button>
-        <button onclick="deleteCar(${car.id}); event.stopImmediatePropagation();" class="btn btn-danger" style="padding:8px 12px;"><i class="fas fa-trash"></i></button>
-      </td>
+    const card = document.createElement('div');
+    card.className = 'car-card';
+    card.onclick = () => showCarPopup(car.id);
+
+    card.innerHTML = `
+      <h3>${car.type}</h3>
+      <div class="plate">${car.plate}</div>
+      ${statusHTML}
     `;
-    tbody.appendChild(tr);
+
+    container.appendChild(card);
   });
+
+  // Nếu không có xe nào
+  if (cars.length === 0) {
+    container.innerHTML = `
+      <div style="text-align:center; padding:40px 20px; color:#64748b;">
+        <i class="fas fa-car" style="font-size:4rem; opacity:0.3; margin-bottom:15px;"></i>
+        <p>Chưa có xe nào. Hãy thêm xe mới!</p>
+      </div>
+    `;
+  }
 }
+
+// ====================== CAR POPUP (Mobile Friendly) ======================
+function showCarPopup(carId) {
+  const car = cars.find(c => c.id === carId);
+  if (!car) return;
+
+  const busy = contracts.some(c => c.plate === car.plate && c.status !== "Đã hoàn tất");
+
+  const popupHTML = `
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-header">
+        <h2>Thông tin xe</h2>
+        <span class="close" onclick="closeCarPopup()">×</span>
+      </div>
+      <div class="car-popup-content">
+        <div style="font-size: 4rem; color: var(--primary); margin: 20px 0;">
+          <i class="fas fa-car"></i>
+        </div>
+        <h3 style="margin: 10px 0 5px;">${car.type}</h3>
+        <div style="font-size: 1.4rem; font-weight: 700; color: #334155; margin-bottom: 20px;">${car.plate}</div>
+
+        <div class="price-info">
+          <div class="price-row">
+            <span>Giá ngày thường:</span>
+            <strong>${formatMoney(car.daily)} ₫</strong>
+          </div>
+          <div class="price-row">
+            <span>Giá cuối tuần:</span>
+            <strong>${formatMoney(car.weekend)} ₫</strong>
+          </div>
+          <div class="price-row">
+            <span>Giá ngày lễ/Tết:</span>
+            <strong>${formatMoney(car.holiday)} ₫</strong>
+          </div>
+        </div>
+
+        <div style="margin: 20px 0;">
+          <strong>Trạng thái: </strong>
+          ${busy 
+            ? `<span class="status busy">Đang có lịch</span>` 
+            : `<span class="status available">Đang rảnh</span>`}
+        </div>
+
+        <div class="action-buttons-grid" style="margin-top: 30px;">
+          <button onclick="showCarSchedule(${car.id}); closeCarPopup();" class="btn btn-info" style="justify-content:center;">
+            <i class="fas fa-calendar-alt"></i> Xem lịch
+          </button>
+          <button onclick="editCar(${car.id}); closeCarPopup();" class="btn btn-edit" style="justify-content:center;">
+            <i class="fas fa-edit"></i> Sửa xe
+          </button>
+          <button onclick="deleteCar(${car.id}); closeCarPopup();" class="btn btn-danger" style="justify-content:center;">
+            <i class="fas fa-trash"></i> Xóa xe
+          </button>
+          <button onclick="closeCarPopup()" class="btn btn-secondary" style="justify-content:center;">
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Tạo modal động
+  let popupModal = document.getElementById('carPopupModal');
+  if (!popupModal) {
+    popupModal = document.createElement('div');
+    popupModal.id = 'carPopupModal';
+    popupModal.className = 'modal';
+    document.body.appendChild(popupModal);
+  }
+
+  popupModal.innerHTML = popupHTML;
+  popupModal.style.display = 'flex';
+}
+
+function closeCarPopup() {
+  const modal = document.getElementById('carPopupModal');
+  if (modal) modal.style.display = 'none';
+}
+
 
 function populateRevenueFilters() {
   const years = new Set();
@@ -2220,7 +2373,7 @@ window.onload = async () => {
     if (e.target === this) closeActionPopup();
   });
 
-  console.log("🚀 CarRent v1.3.1 - Đã hỗ trợ nửa ngày đầu / nửa ngày cuối!");
+  console.log("🚀 CarRent v1.3.2 - Đã hỗ trợ nửa ngày đầu / nửa ngày cuối!");
 };
 
 function formatPriceInput(e) {
@@ -2231,6 +2384,8 @@ function formatPriceInput(e) {
     formatted += value[i];
   }
   e.target.value = formatted;
+  // Render xe theo kiểu mới
+  renderCars();  
 }
 </script>
 </body>
