@@ -1005,25 +1005,34 @@ function updateCustomerDatalists() {
   });
 }
 
-function autoFillFromPhone() {
-  const phoneInput = document.getElementById('phone').value.trim();
-  if (!phoneInput || !customerHistory[phoneInput]) return;
-  
-  // Chỉ điền khi khớp chính xác 100%
-  document.getElementById('customerName').value = customerHistory[phoneInput].name;
-}
 
 function autoFillFromName() {
-  const nameInput = document.getElementById('customerName').value.trim();
+  const nameInput = document.getElementById('customerName').value
+    .trim()
+    .toLowerCase();
+
   if (!nameInput) return;
 
-  // Tìm exact match (khớp chính xác tên)
   for (const [phone, data] of Object.entries(customerHistory)) {
-    if (data.name === nameInput) {   // === thay vì includes
-      document.getElementById('phone').value = phone;
+    const savedName = data.name.trim().toLowerCase();
+
+    if (savedName === nameInput) {
+      const phoneField = document.getElementById('phone');
+
+      // chỉ fill nếu user chưa nhập số
+      if (!phoneField.value.trim()) {
+        phoneField.value = phone;
+      }
+
       return;
     }
   }
+}
+
+let timeout;
+function handleNameInput() {
+  clearTimeout(timeout);
+  timeout = setTimeout(autoFillFromName, 300);
 }
 
 async function loadData() {
