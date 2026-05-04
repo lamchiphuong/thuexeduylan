@@ -1219,7 +1219,7 @@ function saveActiveNote() {
     contract.activeNote = document.getElementById('noteText').value.trim();
     renderAll();
     saveData();
-    showToast("Ghi chú đang xử lý đã được lưu!");
+    showToast("Ghi chú đã được lưu!");
   }
   closeNoteModal();
 }
@@ -1244,7 +1244,7 @@ function saveHistoryNote() {
     contract.historyNote = document.getElementById('historyNoteText').value.trim();
     renderAll();
     saveData();
-    showToast("Ghi chú lịch sử đã được lưu!");
+    showToast("Ghi chú đã được lưu!");
   }
   closeHistoryNoteModal();
 }
@@ -1502,6 +1502,9 @@ function renderActiveContracts() {
     filtered = filtered.filter(c => c.status === currentStatusFilter);
   }
 
+  // SẮP XẾP TĂNG DẦN THEO NGÀY NHẬN XE
+  filtered.sort((a, b) => new Date(a.rentDate) - new Date(b.rentDate));
+
   filtered.forEach(contract => {
     const totalMoney = calculateTotal(contract);
     const extra = calculateExtraTotal(contract);
@@ -1651,6 +1654,9 @@ function renderCompletedContracts() {
   if (currentRevenueCar) filtered = filtered.filter(c => c.plate === currentRevenueCar);
   if (currentRevenueType) filtered = filtered.filter(c => (c.contractType || 'normal') === currentRevenueType);
 
+  // SẮP XẾP TĂNG DẦN THEO NGÀY NHẬN XE
+  filtered.sort((a, b) => new Date(a.rentDate) - new Date(b.rentDate));
+
   let titleText = "Tổng doanh thu từ tất cả hợp đồng hoàn tất";
   if (currentRevenueYear && currentRevenueMonth) titleText = `Doanh thu tháng ${currentRevenueMonth} / ${currentRevenueYear}`;
   if (currentRevenueCar) {
@@ -1699,6 +1705,9 @@ function printRevenue() {
   if (currentRevenueMonth) filtered = filtered.filter(c => (new Date(c.rentDate).getMonth() + 1).toString() === currentRevenueMonth);
   if (currentRevenueCar) filtered = filtered.filter(c => c.plate === currentRevenueCar);
   if (currentRevenueType) filtered = filtered.filter(c => (c.contractType || 'normal') === currentRevenueType);
+
+  // SẮP XẾP TĂNG DẦN THEO NGÀY NHẬN XE (giống bảng lịch sử)
+  filtered.sort((a, b) => new Date(a.rentDate) - new Date(b.rentDate));
 
   if (filtered.length === 0) {
     alert("Không có dữ liệu để in theo bộ lọc hiện tại!");
@@ -1749,6 +1758,7 @@ function printRevenue() {
     const d = getCompletedDisplay(con);
     const rentHalfText = (d.rentHalf || 'full') === 'half' ? ' (½ ngày đầu)' : '';
     const returnHalfText = (d.returnHalf || 'full') === 'half' ? ' (½ ngày cuối)' : '';
+    
     html += `
       <tr>
         <td>${d.customer || ''}</td>
