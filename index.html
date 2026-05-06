@@ -807,6 +807,21 @@
     </div>
   </div>
 
+<!-- Modal Chọn Khách khi trùng tên -->
+<div id="customerSelectModal" class="modal">
+  <div class="modal-content" style="max-width: 460px;">
+    <div class="modal-header">
+      <h2>Chọn khách hàng</h2>
+      <span class="close" onclick="closeCustomerSelectModal()">×</span>
+    </div>
+    <p style="margin: 15px 0; color: #475569;">Tìm thấy nhiều khách cùng tên. Vui lòng chọn:</p>
+    <div id="customerSelectList" style="max-height: 400px; overflow-y: auto;"></div>
+    <div style="margin-top: 20px; text-align: center;">
+      <button onclick="closeCustomerSelectModal()" class="btn btn-secondary" style="min-width: 120px;">Đóng</button>
+    </div>
+  </div>
+</div>
+
   <!-- Car Modal -->
   <div id="carModal" class="modal">
     <div class="modal-content">
@@ -1006,26 +1021,27 @@ function updateCustomerDatalists() {
 }
 
 
+// Tự điền theo tên - Hỗ trợ nhiều khách trùng tên
+// Tự điền SĐT khi nhập tên (hỗ trợ trùng tên)
 function autoFillFromName() {
-  const nameInput = document.getElementById('customerName').value
-    .trim()
-    .toLowerCase();
-
+  const nameInput = document.getElementById('customerName').value.trim();
   if (!nameInput) return;
 
+  const matches = [];
   for (const [phone, data] of Object.entries(customerHistory)) {
-    const savedName = data.name.trim().toLowerCase();
-
-    if (savedName === nameInput) {
-      const phoneField = document.getElementById('phone');
-
-      // chỉ fill nếu user chưa nhập số
-      if (!phoneField.value.trim()) {
-        phoneField.value = phone;
-      }
-
-      return;
+    if (data.name === nameInput) {
+      matches.push({ phone, name: data.name });
     }
+  }
+
+  if (matches.length === 0) return;
+
+  if (matches.length === 1) {
+    // Chỉ có 1 kết quả → tự điền
+    document.getElementById('phone').value = matches[0].phone;
+  } else {
+    // Nhiều khách trùng tên → hiện modal chọn
+    showCustomerSelectModal(matches, nameInput);
   }
 }
 
@@ -1252,6 +1268,51 @@ function saveHistoryNote() {
 function closeHistoryNoteModal() {
   document.getElementById('historyNoteModal').style.display = 'none';
 }
+
+
+// ====================== TỰ ĐIỀN KHÁCH HÀNG ======================
+function autoFillFromPhone() {
+  const phoneInput = document.getElementById('phone').value.trim();
+  if (!phoneInput || !customerHistory[phoneInput]) return;
+  
+  document.getElementById('customerName').value = customerHistory[phoneInput].name;
+}
+
+// ====================== CHỌN KHÁCH KHI TRÙNG TÊN ======================
+// ====================== CHỌN KHÁCH KHI TRÙNG TÊN ======================
+function showCustomerSelectModal(matches, customerName) {
+  const container = document.getElementById('customerSelectList');
+  container.innerHTML = '';
+
+  matches.forEach(match => {
+    const div = document.createElement('div');
+    div.style.cssText = `
+      padding: 14px 16px; 
+      margin: 6px 0; 
+      border: 2px solid #e2e8f0; 
+      border-radius: 12px; 
+      cursor: pointer;
+      transition: all 0.2s;
+    `;
+    div.innerHTML = `
+      <strong>${match.name}</strong><br>
+      <span style="color:#2563eb; font-weight:600;">📱 ${match.phone}</span>
+    `;
+    div.onclick = () => {
+      document.getElementById('phone').value = match.phone;
+      closeCustomerSelectModal();
+      showToast(`Đã chọn SĐT: ${match.phone}`);
+    };
+    container.appendChild(div);
+  });
+
+  document.getElementById('customerSelectModal').style.display = 'flex';
+}
+
+function closeCustomerSelectModal() {
+  document.getElementById('customerSelectModal').style.display = 'none';
+}
+
 
 // ====================== POP-UP HÀNH ĐỘNG ======================
 function showActionPopup(id) {
@@ -2229,8 +2290,17 @@ window.onload = async () => {
     closeSimpleConfirmModal();
   });
 
-  document.getElementById('phone').addEventListener('input', autoFillFromPhone);
+// Tự điền khách hàng
   document.getElementById('customerName').addEventListener('input', autoFillFromName);
+
+  // Đóng modal khi click nền
+  document.getElementById('customerSelectModal').addEventListener('click', function(e) {
+    if (e.target === this) closeCustomerSelectModal();
+  });
+
+  document.getElementById('actionPopup').addEventListener('click', function(e) {
+    if (e.target === this) closeActionPopup();
+  });
 
   document.getElementById('actionPopup').addEventListener('click', function(e) {
     if (e.target === this) closeActionPopup();
