@@ -662,7 +662,7 @@
         <input type="text" id="customerName" list="customerNameList" placeholder="Tên khách thuê" required>
 
         <label>Số điện thoại</label>
-        <input type="tel" id="phone" list="phoneList" placeholder="Số điện thoại" required>
+        <input type="tel" id="phone" list="phoneList" placeholder="Số điện thoại">
 
         <datalist id="customerNameList"></datalist>
         <datalist id="phoneList"></datalist>
@@ -928,7 +928,7 @@
   </div>
 
   <div class="version">
-    CarRent v1.3.1 (2026)
+    CarRent v1.3.2 (2026)
   </div>
 
 <script>
@@ -2060,11 +2060,13 @@ function deleteCar(id) {
     });
 }
 
-// ====================== FORM SUBMIT ======================
+// ====================== FORM CONTRACT SUBMIT ======================
 document.getElementById('contractForm').addEventListener('submit', e => {
   e.preventDefault();
+
   const carId = parseInt(document.getElementById('carSelect').value);
   const contractId = document.getElementById('contractId').value ? parseInt(document.getElementById('contractId').value) : null;
+  
   const car = getCarById(carId);
   if (!car) return alert("Vui lòng chọn xe!");
 
@@ -2078,20 +2080,40 @@ document.getElementById('contractForm').addEventListener('submit', e => {
   const discount = parseMoney(document.getElementById('discount').value);
   const customTotalPrice = parseMoney(document.getElementById('customTotalPrice').value);
 
-  if (!contractId && isDateOverlap(rent, ret, car.plate)) 
-    return alert("Xe đã có lịch trong khoảng thời gian này!");
+  // ====================== KIỂM TRA TRÙNG LỊCH ======================
+if (isDateOverlap(rent, ret, car.plate, contractId)) {
+  const conflicting = contracts.find(c => 
+    c.plate === car.plate && 
+    c.id !== contractId && 
+    c.status !== "Đã hoàn tất" &&
+    new Date(rent) <= new Date(c.returnDate) && 
+    new Date(ret) >= new Date(c.rentDate)
+  );
+  
+  alert(`❌ Xe ${car.plate} đã có lịch:\n\n` +
+        `${conflicting.customer} - ${formatDate(conflicting.rentDate)} đến ${formatDate(conflicting.returnDate)}`);
+  return;
+}
 
+  // ====================== XỬ LÝ PHỤ PHÍ ======================
   const extraFees = [];
   document.querySelectorAll('#extraFeesList .extra-fee-row').forEach(row => {
     const amt = parseMoney(row.querySelector('.fee-amount').value);
-    if (amt > 0) extraFees.push({ type: row.querySelector('.fee-type').value, amount: amt });
+    if (amt > 0) {
+      extraFees.push({ 
+        type: row.querySelector('.fee-type').value, 
+        amount: amt 
+      });
+    }
   });
 
+  // ====================== CẬP NHẬT HOẶC THÊM MỚI ======================
   if (contractId) {
+    // === SỬA HỢP ĐỒNG ===
     const contract = contracts.find(c => c.id === contractId);
     if (contract) {
-      contract.customer = document.getElementById('customerName').value;
-      contract.phone = document.getElementById('phone').value;
+      contract.customer = document.getElementById('customerName').value.trim();
+      contract.phone = document.getElementById('phone').value.trim();
       contract.carType = car.type;
       contract.plate = car.plate;
       contract.rentDate = rent;
@@ -2111,10 +2133,11 @@ document.getElementById('contractForm').addEventListener('submit', e => {
     }
     showToast('Hợp đồng đã được cập nhật!');
   } else {
+    // === THÊM HỢP ĐỒNG MỚI ===
     contracts.push({
       id: Date.now(),
-      customer: document.getElementById('customerName').value,
-      phone: document.getElementById('phone').value,
+      customer: document.getElementById('customerName').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
       carType: car.type,
       plate: car.plate,
       rentDate: rent,
@@ -2306,7 +2329,7 @@ window.onload = async () => {
     if (e.target === this) closeActionPopup();
   });
 
-  console.log("🚀 CarRent v1.3.1 - Đã hỗ trợ nửa ngày đầu / nửa ngày cuối!");
+  console.log("🚀 CarRent v1.3.2 - Đã hỗ trợ nửa ngày đầu / nửa ngày cuối!");
 };
 
 function formatPriceInput(e) {
