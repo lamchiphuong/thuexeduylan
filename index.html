@@ -459,6 +459,21 @@
       #tab2 { display: block !important; box-shadow: none; }
       .table-container { overflow: visible; }
     }
+    .loading-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(248, 250, 252, 0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .loading-overlay.show {
+      display: flex;
+    }
   </style>
 </head>
 <body>
@@ -928,7 +943,16 @@
   </div>
 
   <div class="version">
-    CarRent v1.3.2 (2026)
+    CarRent v1.3.3 (2026)
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div style="text-align:center;">
+      <i class="fas fa-spinner fa-spin" style="font-size:48px; color:#2563eb; margin-bottom:20px;"></i>
+      <h3>Đang tải dữ liệu từ cloud...</h3>
+      <p style="color:#64748b; margin-top:8px;">Vui lòng chờ trong giây lát</p>
+    </div>
   </div>
 
 <script>
@@ -1052,15 +1076,74 @@ function handleNameInput() {
 }
 
 async function loadData() {
+  const loading = document.getElementById('loadingOverlay');
+  loading.classList.add('show');
+
   try {
     const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
       headers: { 'X-Master-Key': MASTER_KEY }
     });
+
+    if (!res.ok) throw new Error('Network response was not ok');
+
     const json = await res.json();
     const data = json.record || json;
+
     cars = Array.isArray(data.cars) ? data.cars : [];
     contracts = Array.isArray(data.contracts) ? data.contracts : [];
-  } catch (e) { console.error("Lỗi load:", e); }
+
+    // Migration code (giữ nguyên phần migrate của bạn)
+    let migrated = false;
+    contracts.forEach(c => {
+      if (c.contractType === 'app' && c.customDailyPrice && !c.customTotalPrice) {
+        c.customTotalPrice = c.customDailyPrice * calculateDays(c.rentDate, c.returnDate);
+        migrated = true;
+      }
+      if (!c.rentHalf) { c.rentHalf = 'full'; migrated = true; }
+      if (!c.returnHalf) { c.returnHalf = 'full'; migrated = true; }
+      if (c.status === "Đã hoàn tất") {
+        if (!c.frozenData) { freezeContract(c); migrated = true; }
+        if (c.note && !c.historyNote) { c.historyNote = c.note; migrated = true; }
+      } else {
+        if (c.note && !c.activeNote) { c.activeNote = c.note; migrated = true; }
+      }
+      if (c.note) delete c.note;
+      if (c.customDailyPrice) delete c.customDailyPrice;
+    });
+
+    if (migrated) await saveData();
+
+    renderAll();
+    populateRevenueFilters();
+
+  } catch (e) {
+    console.error("Lỗi load:", e);
+    
+    // Hiển thị lỗi
+    const errorHTML = `
+      <div style="text-align:center; padding:60px 20px; max-width:500px;">
+        <i class="fas fa-exclamation-triangle" style="font-size:48px; color:#ef4444; margin-bottom:20px;"></i>
+        <h3>Lỗi tải dữ liệu</h3>
+        <p style="color:#64748b; margin:15px 0;">Không thể kết nối với cloud. Vui lòng kiểm tra mạng.</p>
+        <button onclick="retryLoad()" class="btn btn-primary" style="padding:12px 28px;">
+          <i class="fas fa-redo"></i> Thử lại
+        </button>
+      </div>`;
+
+    // Tạm thay nội dung tab0 để báo lỗi
+    document.getElementById('activeContractBody').innerHTML = `
+      <tr><td colspan="12" style="text-align:center; padding:60px;">${errorHTML}</td></tr>`;
+  } finally {
+    // Ẩn loading sau khi xong (có delay nhẹ cho đẹp)
+    setTimeout(() => {
+      loading.classList.remove('show');
+    }, 300);
+  }
+}
+
+// Hàm retry
+function retryLoad() {
+  loadData();
 }
 
 async function saveData() {
@@ -1278,7 +1361,6 @@ function autoFillFromPhone() {
   document.getElementById('customerName').value = customerHistory[phoneInput].name;
 }
 
-// ====================== CHỌN KHÁCH KHI TRÙNG TÊN ======================
 // ====================== CHỌN KHÁCH KHI TRÙNG TÊN ======================
 function showCustomerSelectModal(matches, customerName) {
   const container = document.getElementById('customerSelectList');
@@ -2329,7 +2411,7 @@ window.onload = async () => {
     if (e.target === this) closeActionPopup();
   });
 
-  console.log("🚀 CarRent v1.3.2 - Đã hỗ trợ nửa ngày đầu / nửa ngày cuối!");
+  console.log("🚀 CarRent v1.3.3");
 };
 
 function formatPriceInput(e) {
