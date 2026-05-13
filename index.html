@@ -26,6 +26,7 @@
   }">
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   
   <style>
     :root {
@@ -610,6 +611,10 @@
         <button onclick="printRevenue()" class="btn btn-secondary" style="height: 48px;">
           <i class="fas fa-print"></i> In báo cáo
         </button>
+        <button onclick="exportRevenueToExcel()" class="btn btn-success" style="height: 48px;">
+          <i class="fas fa-file-excel"></i> Xuất Excel
+        </button>
+
       </div>
 
       <div style="background:#f0fdf4; border-radius:16px; padding:20px; margin-bottom:25px; display:flex; justify-content:space-between; align-items:center;">
@@ -1753,6 +1758,7 @@ function renderCars() {
   });
 }
 function populateRevenueFilters() {
+  // Populate Năm
   const years = new Set();
   contracts.forEach(c => {
     if (c.status === "Đã hoàn tất" && c.rentDate) {
@@ -1764,15 +1770,12 @@ function populateRevenueFilters() {
   yearSel.innerHTML = '<option value="">Tất cả năm</option>';
   Array.from(years).sort((a,b)=>b-a).forEach(y => {
     const opt = document.createElement('option');
-    opt.value = y; opt.textContent = y; yearSel.appendChild(opt);
+    opt.value = y; 
+    opt.textContent = y; 
+    yearSel.appendChild(opt);
   });
 
-  const currY = new Date().getFullYear();
-  const currM = (new Date().getMonth() + 1).toString();
-  if (years.has(currY)) yearSel.value = currY;
-  document.getElementById('revenueMonthFilter').value = currM;
-  currentRevenueMonth = currM;
-
+  // Populate Xe (phần này bị mất trước đó)
   const carSel = document.getElementById('revenueCarFilter');
   carSel.innerHTML = '<option value="">Tất cả xe</option>';
   cars.forEach(car => {
@@ -1782,9 +1785,22 @@ function populateRevenueFilters() {
     carSel.appendChild(opt);
   });
 
+  const currY = new Date().getFullYear().toString();
+  const currM = (new Date().getMonth() + 1).toString();
+
+  // Mặc định tháng hiện tại
+  yearSel.value = currY;
+  document.getElementById('revenueMonthFilter').value = currM;
+
+  // Đồng bộ biến
+  currentRevenueYear = currY;
+  currentRevenueMonth = currM;
+  // Giữ nguyên nếu người dùng đã chọn xe hoặc loại trước đó
+  // currentRevenueCar = '';
+  // currentRevenueType = '';
+
   renderCompletedContracts();
 }
-
 function filterCompletedContracts() {
   currentRevenueYear = document.getElementById('revenueYearFilter').value;
   currentRevenueMonth = document.getElementById('revenueMonthFilter').value;
@@ -1809,20 +1825,36 @@ function renderCompletedContracts() {
 
   let filtered = contracts.filter(c => c.status === "Đã hoàn tất");
 
-  if (currentRevenueYear) filtered = filtered.filter(c => new Date(c.rentDate).getFullYear().toString() === currentRevenueYear);
-  if (currentRevenueMonth) filtered = filtered.filter(c => (new Date(c.rentDate).getMonth() + 1).toString() === currentRevenueMonth);
-  if (currentRevenueCar) filtered = filtered.filter(c => c.plate === currentRevenueCar);
-  if (currentRevenueType) filtered = filtered.filter(c => (c.contractType || 'normal') === currentRevenueType);
+  // === BỘ LỌC ĐẦY ĐỦ ===
+  if (currentRevenueYear) {
+    filtered = filtered.filter(c => new Date(c.rentDate).getFullYear().toString() === currentRevenueYear);
+  }
+  if (currentRevenueMonth) {
+    filtered = filtered.filter(c => (new Date(c.rentDate).getMonth() + 1).toString() === currentRevenueMonth);
+  }
+  if (currentRevenueCar) {
+    filtered = filtered.filter(c => c.plate === currentRevenueCar);
+  }
+  if (currentRevenueType) {
+    filtered = filtered.filter(c => (c.contractType || 'normal') === currentRevenueType);
+  }
 
-  // SẮP XẾP TĂNG DẦN THEO NGÀY NHẬN XE
+  // Sắp xếp theo ngày nhận xe
   filtered.sort((a, b) => new Date(a.rentDate) - new Date(b.rentDate));
 
-  let titleText = "Tổng doanh thu từ tất cả hợp đồng hoàn tất";
-  if (currentRevenueYear && currentRevenueMonth) titleText = `Doanh thu tháng ${currentRevenueMonth} / ${currentRevenueYear}`;
+  // Tiêu đề động
+  let titleText = "Tổng doanh thu từ tất cả hợp đồng đã hoàn tất";
+  if (currentRevenueYear && currentRevenueMonth) {
+    titleText = `Doanh thu tháng ${currentRevenueMonth} / ${currentRevenueYear}`;
+  }
   if (currentRevenueCar) {
     const car = cars.find(c => c.plate === currentRevenueCar);
     if (car) titleText += ` (${car.type} - ${car.plate})`;
   }
+  if (currentRevenueType) {
+    titleText += currentRevenueType === 'app' ? " (Đặt qua app)" : " (Thuê thường)";
+  }
+
   document.getElementById('revenueTitle').textContent = titleText;
 
   filtered.forEach(contract => {
@@ -1866,13 +1898,12 @@ function printRevenue() {
   if (currentRevenueCar) filtered = filtered.filter(c => c.plate === currentRevenueCar);
   if (currentRevenueType) filtered = filtered.filter(c => (c.contractType || 'normal') === currentRevenueType);
 
-  // SẮP XẾP TĂNG DẦN THEO NGÀY NHẬN XE (giống bảng lịch sử)
-  filtered.sort((a, b) => new Date(a.rentDate) - new Date(b.rentDate));
-
   if (filtered.length === 0) {
     alert("Không có dữ liệu để in theo bộ lọc hiện tại!");
     return;
   }
+
+  filtered.sort((a, b) => new Date(a.rentDate) - new Date(b.rentDate));
 
   const printWin = window.open('', '_blank');
   let html = `
@@ -2442,6 +2473,81 @@ function formatPriceInput(e) {
     formatted += value[i];
   }
   e.target.value = formatted;
+}
+function exportRevenueToExcel() {
+  let filtered = contracts.filter(c => c.status === "Đã hoàn tất");
+
+  if (currentRevenueYear) filtered = filtered.filter(c => new Date(c.rentDate).getFullYear().toString() === currentRevenueYear);
+  if (currentRevenueMonth) filtered = filtered.filter(c => (new Date(c.rentDate).getMonth() + 1).toString() === currentRevenueMonth);
+  if (currentRevenueCar) filtered = filtered.filter(c => c.plate === currentRevenueCar);
+  if (currentRevenueType) filtered = filtered.filter(c => (c.contractType || 'normal') === currentRevenueType);
+
+  if (filtered.length === 0) {
+    alert("Không có dữ liệu để xuất Excel!");
+    return;
+  }
+
+  filtered.sort((a, b) => new Date(a.rentDate) - new Date(b.rentDate));
+
+  const data = [
+    ["STT", "Khách hàng", "SĐT", "Loại xe", "Biển số", "Loại hợp đồng", 
+     "Ngày nhận xe", "Ngày trả xe", "Số ngày", "Tiền thuê xe", "Phụ phí", 
+     "Giảm giá", "Tổng doanh thu", "Ghi chú"]
+  ];
+
+  let totalRevenue = 0;
+
+  filtered.forEach((con, index) => {
+    const d = getCompletedDisplay(con);
+    const rental = d.rentalAmount || calculateRentalTotal(con);
+    const extra = d.extraFees ? d.extraFees.reduce((s, f) => s + (f.amount || 0), 0) : 0;
+    const discount = d.discount || 0;
+    const total = d.totalAmount || (rental + extra - discount);
+    
+    totalRevenue += total;
+
+    data.push([
+      index + 1,
+      d.customer || '',
+      d.phone || '',
+      d.carType || '',
+      d.plate || '',
+      d.contractType === 'app' ? 'Đặt qua app' : 'Thuê thường',
+      formatDate(d.rentDate) + (d.rentTime ? ' ' + d.rentTime : ''),
+      formatDate(d.returnDate) + (d.returnTime ? ' ' + d.returnTime : ''),
+      calculateDays(d.rentDate, d.returnDate),
+      rental, extra, discount, total,
+      d.historyNote || con.historyNote || ''
+    ]);
+  });
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(data);
+
+  ws['!cols'] = [
+    {wch:5}, {wch:22}, {wch:12}, {wch:22}, {wch:12},
+    {wch:15}, {wch:18}, {wch:18}, {wch:8}, {wch:15},
+    {wch:12}, {wch:12}, {wch:16}, {wch:35}
+  ];
+
+  let sheetName = currentRevenueMonth && currentRevenueYear 
+    ? `Tháng ${currentRevenueMonth} ${currentRevenueYear}` 
+    : currentRevenueYear ? `Năm ${currentRevenueYear}` : "Tất cả";
+
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+
+  let fileName = "Doanh thu";
+  if (currentRevenueMonth && currentRevenueYear) {
+    fileName = `Doanh thu _ Tháng ${currentRevenueMonth} _ ${currentRevenueYear}`;
+  } else if (currentRevenueYear) {
+    fileName = `Doanh thu _ Năm ${currentRevenueYear}`;
+  } else {
+    fileName = "Doanh thu _ Tat_ca";
+  }
+  fileName += ".xlsx";
+
+  XLSX.writeFile(wb, fileName);
+  showToast(`Đã xuất file: <strong>${fileName}</strong>`);
 }
 </script>
 </body>
