@@ -1710,11 +1710,21 @@ function renderActiveContracts() {
 function renderCars() {
   const tbody = document.getElementById('carBody');
   tbody.innerHTML = '';
+  
   cars.forEach(car => {
     const busy = contracts.some(c => c.plate === car.plate && c.status !== "Đã hoàn tất");
-    const statusHTML = busy ? `<span class="status busy">Đang có lịch</span>` : `<span class="status available">Đang rảnh</span>`;
+    const statusHTML = busy ? 
+      `<span class="status busy">Đang có lịch</span>` : 
+      `<span class="status available">Đang rảnh</span>`;
 
     const tr = document.createElement('tr');
+    tr.style.cursor = 'pointer';                    // Thêm con trỏ tay
+    tr.onclick = (e) => {
+      // Nếu click vào button thì không mở lịch (ngăn event bubble)
+      if (e.target.closest('button')) return;
+      showCarSchedule(car.id);
+    };
+
     tr.innerHTML = `
       <td>${car.type}</td>
       <td><strong>${car.plate}</strong></td>
@@ -1722,16 +1732,26 @@ function renderCars() {
       <td>${formatMoney(car.daily)} ₫</td>
       <td>${formatMoney(car.weekend)} ₫</td>
       <td>${formatMoney(car.holiday)} ₫</td>
-      <td><button onclick="showCarSchedule(${car.id}); event.stopImmediatePropagation();" class="btn btn-info" style="padding:8px 16px;font-size:0.9rem;">📅 Xem lịch</button></td>
+      <td>
+        <button onclick="showCarSchedule(${car.id}); event.stopImmediatePropagation();" 
+                class="btn btn-info" style="padding:8px 16px;font-size:0.9rem;">
+          📅 Xem lịch
+        </button>
+      </td>
       <td style="display:flex; gap:6px;">
-        <button onclick="editCar(${car.id}); event.stopImmediatePropagation();" class="btn btn-edit" style="padding:8px 12px;"><i class="fas fa-edit"></i></button>
-        <button onclick="deleteCar(${car.id}); event.stopImmediatePropagation();" class="btn btn-danger" style="padding:8px 12px;"><i class="fas fa-trash"></i></button>
+        <button onclick="editCar(${car.id}); event.stopImmediatePropagation();" 
+                class="btn btn-edit" style="padding:8px 12px;">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button onclick="deleteCar(${car.id}); event.stopImmediatePropagation();" 
+                class="btn btn-danger" style="padding:8px 12px;">
+          <i class="fas fa-trash"></i>
+        </button>
       </td>
     `;
     tbody.appendChild(tr);
   });
 }
-
 function populateRevenueFilters() {
   const years = new Set();
   contracts.forEach(c => {
