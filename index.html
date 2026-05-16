@@ -1650,6 +1650,11 @@ function renderActiveContracts() {
     filtered = filtered.filter(c => c.status === currentStatusFilter);
   }
 
+  // SẮP XẾP THEO NGÀY NHẬN XE TĂNG DẦN (cũ nhất lên trên)
+  filtered.sort((a, b) => {
+    return new Date(a.rentDate) - new Date(b.rentDate);
+  });
+
   filtered.forEach(contract => {
     const totalMoney = calculateTotal(contract);
     const extra = calculateExtraTotal(contract);
