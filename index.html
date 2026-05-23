@@ -1054,7 +1054,13 @@ function updateCustomerDatalists() {
 // Tự điền SĐT khi nhập tên (hỗ trợ trùng tên)
 function autoFillFromName() {
   const nameInput = document.getElementById('customerName').value.trim();
-  if (!nameInput) return;
+  const phoneInput = document.getElementById('phone');
+
+  // Nếu tên trống → xóa luôn SĐT
+  if (!nameInput) {
+    phoneInput.value = '';
+    return;
+  }
 
   const matches = [];
   for (const [phone, data] of Object.entries(customerHistory)) {
@@ -1063,14 +1069,17 @@ function autoFillFromName() {
     }
   }
 
-  if (matches.length === 0) return;
-
   if (matches.length === 1) {
-    // Chỉ có 1 kết quả → tự điền
-    document.getElementById('phone').value = matches[0].phone;
+    // Khớp chính xác 1 khách → tự điền SĐT
+    phoneInput.value = matches[0].phone;
   } else {
-    // Nhiều khách trùng tên → hiện modal chọn
-    showCustomerSelectModal(matches, nameInput);
+    // Không khớp hoặc trùng tên → xóa SĐT
+    phoneInput.value = '';
+    
+    // Nếu có nhiều khách trùng tên thì hiện modal chọn
+    if (matches.length > 1) {
+      showCustomerSelectModal(matches, nameInput);
+    }
   }
 }
 
