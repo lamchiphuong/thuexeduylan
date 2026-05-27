@@ -27,7 +27,10 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  
+  <!-- ==================== FIREBASE SDK ==================== -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
   <style>
     :root {
       --primary: #2563eb;
@@ -948,23 +951,29 @@
   </div>
 
   <div class="version">
-    CarRent v1.3.3 (2026)
+    CarRent v1.3.3 - 2026
   </div>
 
   <!-- Loading Overlay -->
   <div id="loadingOverlay" class="loading-overlay">
     <div style="text-align:center;">
       <i class="fas fa-spinner fa-spin" style="font-size:48px; color:#2563eb; margin-bottom:20px;"></i>
-      <h3>Đang tải dữ liệu từ cloud...</h3>
+      <h3>Đang tải dữ liệu ...</h3>
       <p style="color:#64748b; margin-top:8px;">Vui lòng chờ trong giây lát</p>
     </div>
   </div>
 
 <script>
-// ==================== CẤU HÌNH ====================
-const MASTER_KEY = "$2a$10$w8HuZEOH5lKslhwqq1vyc.pW/hNhvuAzCkMse5cgH4R9cX.n27ISO";
-const BIN_ID = "69cbd91436566621a866f521";
+// ==================== FIREBASE CONFIG ====================
+const firebaseConfig = {
+  databaseURL: "https://carrent-2026-default-rtdb.asia-southeast1.firebasedatabase.app/"
+};
 
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const dataRef = db.ref('/');
+
+// ==================== BIẾN TOÀN CỤC ====================
 let cars = [], contracts = [];
 let holidays = ["2026-01-01", "2026-04-25","2026-04-26","2026-04-27", "2026-04-28","2026-04-29", "2026-04-30", "2026-05-01", "2026-05-02","2026-05-03","2026-09-02"];
 
@@ -986,7 +995,7 @@ let currentRevenueType = '';
 let currentContractType = 'normal';
 let currentActionContractId = null;
 
-// ====================== HELPER ======================
+// ==================== HELPER FUNCTIONS (giữ nguyên) ====================
 function formatMoney(num) {
   return Number(num || 0).toLocaleString('vi-VN').replace(/,/g, ' ');
 }
@@ -1003,11 +1012,21 @@ function formatDate(dateStr) {
 }
 
 function showToast(msg) {
-  const toast = document.getElementById('toast');
-  document.getElementById('toastMessage').innerHTML = msg;
+  const toast = document.getElementById('toast') || document.createElement('div');
+  if (!document.getElementById('toast')) {
+    toast.id = 'toast';
+    toast.style.cssText = `position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#333;color:white;padding:14px 24px;border-radius:12px;box-shadow:0 8px 25px rgba(0,0,0,0.3);z-index:3000;`;
+    document.body.appendChild(toast);
+  }
+  toast.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
   toast.style.display = 'flex';
   setTimeout(() => toast.style.display = 'none', 4000);
 }
+
+// ==================== FIREBASE: LOAD & SAVE ====================
+let isFirstLoad = true;
+
+// ====================== HELPER ======================
 
 let customerHistory = {};
 
@@ -1054,13 +1073,7 @@ function updateCustomerDatalists() {
 // Tự điền SĐT khi nhập tên (hỗ trợ trùng tên)
 function autoFillFromName() {
   const nameInput = document.getElementById('customerName').value.trim();
-  const phoneInput = document.getElementById('phone');
-
-  // Nếu tên trống → xóa luôn SĐT
-  if (!nameInput) {
-    phoneInput.value = '';
-    return;
-  }
+  if (!nameInput) return;
 
   const matches = [];
   for (const [phone, data] of Object.entries(customerHistory)) {
@@ -1069,17 +1082,14 @@ function autoFillFromName() {
     }
   }
 
+  if (matches.length === 0) return;
+
   if (matches.length === 1) {
-    // Khớp chính xác 1 khách → tự điền SĐT
-    phoneInput.value = matches[0].phone;
+    // Chỉ có 1 kết quả → tự điền
+    document.getElementById('phone').value = matches[0].phone;
   } else {
-    // Không khớp hoặc trùng tên → xóa SĐT
-    phoneInput.value = '';
-    
-    // Nếu có nhiều khách trùng tên thì hiện modal chọn
-    if (matches.length > 1) {
-      showCustomerSelectModal(matches, nameInput);
-    }
+    // Nhiều khách trùng tên → hiện modal chọn
+    showCustomerSelectModal(matches, nameInput);
   }
 }
 
@@ -1089,71 +1099,63 @@ function handleNameInput() {
   timeout = setTimeout(autoFillFromName, 300);
 }
 
-async function loadData() {
+function loadData() {
   const loading = document.getElementById('loadingOverlay');
   loading.classList.add('show');
 
-  try {
-    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-      headers: { 'X-Master-Key': MASTER_KEY }
-    });
+  console.log("Bắt đầu kết nối dữ liệu từ server...");
 
-    if (!res.ok) throw new Error('Network response was not ok');
+  dataRef.on('value', (snapshot) => {
+    console.log("Nhận dữ liệu từ server thành công!");
+    try {
+      const data = snapshot.val() || { cars: [], contracts: [] };
+console.log("Số lượng xe:", cars.length, "| Số hợp đồng:", contracts.length);
 
-    const json = await res.json();
-    const data = json.record || json;
+      cars = Array.isArray(data.cars) ? data.cars : [];
+      contracts = Array.isArray(data.contracts) ? data.contracts : [];
 
-    cars = Array.isArray(data.cars) ? data.cars : [];
-    contracts = Array.isArray(data.contracts) ? data.contracts : [];
+      let migrated = false;
+      contracts.forEach(c => {
+        if (!c.rentHalf) { c.rentHalf = 'full'; migrated = true; }
+        if (!c.returnHalf) { c.returnHalf = 'full'; migrated = true; }
+        if (c.status === "Đã hoàn tất" && !c.frozenData) {
+          freezeContract(c);
+          migrated = true;
+        }
+      });
 
-    // Migration code (giữ nguyên phần migrate của bạn)
-    let migrated = false;
-    contracts.forEach(c => {
-      if (c.contractType === 'app' && c.customDailyPrice && !c.customTotalPrice) {
-        c.customTotalPrice = c.customDailyPrice * calculateDays(c.rentDate, c.returnDate);
-        migrated = true;
+      if (migrated) saveData();
+
+      renderAll();
+      populateRevenueFilters();
+
+      if (isFirstLoad) {
+        showToast("Chào mừng đến với Carrent");
+        isFirstLoad = false;
       }
-      if (!c.rentHalf) { c.rentHalf = 'full'; migrated = true; }
-      if (!c.returnHalf) { c.returnHalf = 'full'; migrated = true; }
-      if (c.status === "Đã hoàn tất") {
-        if (!c.frozenData) { freezeContract(c); migrated = true; }
-        if (c.note && !c.historyNote) { c.historyNote = c.note; migrated = true; }
-      } else {
-        if (c.note && !c.activeNote) { c.activeNote = c.note; migrated = true; }
-      }
-      if (c.note) delete c.note;
-      if (c.customDailyPrice) delete c.customDailyPrice;
-    });
 
-    if (migrated) await saveData();
-
-    renderAll();
-    populateRevenueFilters();
-
-  } catch (e) {
-    console.error("Lỗi load:", e);
-    
-    // Hiển thị lỗi
-    const errorHTML = `
-      <div style="text-align:center; padding:60px 20px; max-width:500px;">
-        <i class="fas fa-exclamation-triangle" style="font-size:48px; color:#ef4444; margin-bottom:20px;"></i>
-        <h3>Lỗi tải dữ liệu</h3>
-        <p style="color:#64748b; margin:15px 0;">Không thể kết nối với cloud. Vui lòng kiểm tra mạng.</p>
-        <button onclick="retryLoad()" class="btn btn-primary" style="padding:12px 28px;">
-          <i class="fas fa-redo"></i> Thử lại
-        </button>
-      </div>`;
-
-    // Tạm thay nội dung tab0 để báo lỗi
-    document.getElementById('activeContractBody').innerHTML = `
-      <tr><td colspan="12" style="text-align:center; padding:60px;">${errorHTML}</td></tr>`;
-  } finally {
-    // Ẩn loading sau khi xong (có delay nhẹ cho đẹp)
-    setTimeout(() => {
       loading.classList.remove('show');
-    }, 300);
-  }
+    } catch (err) {
+      console.error("❌ Lỗi xử lý dữ liệu:", err);
+      loading.classList.remove('show');
+      alert("Lỗi xử lý dữ liệu: " + err.message);
+    }
+  }, (error) => {
+    console.error("❌ Firebase Error:", error);
+    loading.classList.remove('show');
+    alert("Lỗi kết nối Firebase:\n" + error.message + "\n\nCode: " + error.code);
+  });
+
+  // Timeout fallback nếu không có phản hồi sau 8 giây
+  setTimeout(() => {
+    if (loading.classList.contains('show')) {
+      console.error("⏰ Timeout - Không nhận được dữ liệu từ server");
+      loading.classList.remove('show');
+      alert("Không thể kết nối server sau 8 giây.\n\n1. Kiểm tra Rules\n2. Kiểm tra tên project");
+    }
+  }, 8000);
 }
+
 
 // Hàm retry
 function retryLoad() {
@@ -1162,12 +1164,19 @@ function retryLoad() {
 
 async function saveData() {
   try {
-    await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-Master-Key': MASTER_KEY },
-      body: JSON.stringify({ cars, contracts })
-    });
-  } catch (e) { console.error("Lỗi save:", e); }
+    console.log("🔄 Đang lưu dữ liệu...");
+    await dataRef.set({ cars: cars, contracts: contracts });
+    console.log("✅ Lưu thành công!");
+    return true;
+  } catch (e) {
+    console.error("❌ Lỗi lưu:", e);
+    if (e.code === 'PERMISSION_DENIED') {
+      alert("❌ LỖI QUYỀN TRUY CẬP!\n\nVui lòng mở Rules trong Firebase Console:\n.read = true\n.write = true");
+    } else {
+      alert("Lỗi lưu dữ liệu: " + e.message);
+    }
+    return false;
+  }
 }
 
 function getCarById(id) { return cars.find(c => c.id === id); }
@@ -1218,7 +1227,8 @@ function calculateRentalTotal(contract) {
 }
 
 function calculateExtraTotal(c) {
-  return (c.extraFees || []).reduce((sum, f) => sum + (f.amount || 0), 0);
+  if (!c) return 0;
+  return Array.isArray(c.extraFees) ? c.extraFees.reduce((sum, f) => sum + (f.amount || 0), 0) : 0;
 }
 
 function calculateTotal(c) {
@@ -1235,6 +1245,7 @@ function calculateRemaining(c) {
 
 function freezeContract(contract) {
   if (contract.frozenData) return;
+
   contract.frozenData = {
     customer: contract.customer,
     phone: contract.phone,
@@ -1247,19 +1258,27 @@ function freezeContract(contract) {
     rentDayType: contract.rentDayType,
     rentHalf: contract.rentHalf || 'full',
     returnHalf: contract.returnHalf || 'full',
-    deposit: contract.deposit,
+    deposit: contract.deposit || 0,
     discount: contract.discount || 0,
-    extraFees: JSON.parse(JSON.stringify(contract.extraFees || [])),
+    extraFees: Array.isArray(contract.extraFees) ? JSON.parse(JSON.stringify(contract.extraFees)) : [],
     contractType: contract.contractType || 'normal',
-    customTotalPrice: contract.customTotalPrice,
+    // SỬA Ở ĐÂY: Không để undefined
+    customTotalPrice: contract.customTotalPrice || null,
     rentalAmount: calculateRentalTotal(contract),
     totalAmount: calculateTotal(contract)
   };
+
   if (contract.activeNote) contract.historyNote = contract.activeNote;
 }
 
 function getCompletedDisplay(con) {
-  if (con.frozenData) return con.frozenData;
+  if (con.frozenData) {
+    return {
+      ...con.frozenData,
+      extraFees: Array.isArray(con.frozenData.extraFees) ? con.frozenData.extraFees : []
+    };
+  }
+  
   return {
     customer: con.customer,
     phone: con.phone,
@@ -1274,11 +1293,12 @@ function getCompletedDisplay(con) {
     returnHalf: con.returnHalf || 'full',
     deposit: con.deposit,
     discount: con.discount || 0,
-    extraFees: con.extraFees || [],
+    extraFees: Array.isArray(con.extraFees) ? con.extraFees : [],
     contractType: con.contractType || 'normal',
     customTotalPrice: con.customTotalPrice,
     rentalAmount: calculateRentalTotal(con),
-    totalAmount: calculateTotal(con)
+    totalAmount: calculateTotal(con),
+    historyNote: con.historyNote
   };
 }
 
@@ -1892,7 +1912,7 @@ function renderCompletedContracts() {
       <td>${formatDate(d.returnDate)} ${d.returnTime || ''}${returnHalfText}</td>
       <td>${calculateDays(d.rentDate, d.returnDate)}</td>
       <td style="text-align:right;">${formatMoney(d.rentalAmount)} ₫</td>
-      <td style="text-align:right;">${formatMoney(d.extraFees.reduce((s,f)=>s+(f.amount||0),0))} ₫</td>
+      <td style="text-align:right;">${formatMoney(Array.isArray(d.extraFees) ? d.extraFees.reduce((s,f)=>s+(f.amount||0),0) : 0)} ₫</td>
       <td style="text-align:right;">${formatMoney(d.discount)} ₫</td>
       <td style="color:#16a34a;font-weight:700;text-align:right;">${formatMoney(d.totalAmount)} ₫</td>
       <td>${noteShort}</td>
@@ -2309,7 +2329,7 @@ if (isDateOverlap(rent, ret, car.plate, contractId)) {
   renderAll();
   closeModal();
   saveData();
-});
+});   // ← THÊM DẤU } NÀY ĐỂ ĐÓNG contractForm listener
 
 // ====================== FORM XE SUBMIT (ĐÃ SỬA - HỖ TRỢ ĐỔI BIỂN SỐ) ======================
 document.getElementById('carForm').addEventListener('submit', e => {
@@ -2394,13 +2414,25 @@ document.getElementById('carForm').addEventListener('submit', e => {
 
   renderAll();
   closeCarModal();
-  saveData();
+  saveData();   // ← thay saveData(); thành cái này
 });
 
 // ====================== KHỞI ĐỘNG ======================
 window.onload = async () => {
   await loadData();
-
+      // === MIGRATION: Sửa dữ liệu cũ có undefined ===
+      contracts.forEach(c => {
+        if (c.frozenData) {
+          if (typeof c.frozenData.customTotalPrice === 'undefined') {
+            c.frozenData.customTotalPrice = null;
+          }
+          if (!Array.isArray(c.frozenData.extraFees)) {
+            c.frozenData.extraFees = [];
+          }
+        }
+        if (!Array.isArray(c.extraFees)) c.extraFees = [];
+      });
+      
   let migrated = false;
   contracts.forEach(c => {
     if (c.contractType === 'app' && c.customDailyPrice && !c.customTotalPrice) {
