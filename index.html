@@ -1070,10 +1070,16 @@ function updateCustomerDatalists() {
 
 
 // Tự điền theo tên - Hỗ trợ nhiều khách trùng tên
-// Tự điền SĐT khi nhập tên (hỗ trợ trùng tên)
+// ====================== TỰ ĐIỀN KHÁCH HÀNG ======================
+
 function autoFillFromName() {
   const nameInput = document.getElementById('customerName').value.trim();
-  if (!nameInput) return;
+  const phoneInput = document.getElementById('phone');
+
+  if (!nameInput) {
+    phoneInput.value = '';   // Xóa SĐT nếu tên trống
+    return;
+  }
 
   const matches = [];
   for (const [phone, data] of Object.entries(customerHistory)) {
@@ -1082,21 +1088,29 @@ function autoFillFromName() {
     }
   }
 
-  if (matches.length === 0) return;
+  // === KIỂM TRA XEM TÊN HIỆN TẠI CÓ KHỚP VỚI SĐT ĐANG CÓ KHÔNG ===
+  const currentPhone = phoneInput.value.trim();
+  if (currentPhone && customerHistory[currentPhone]) {
+    if (customerHistory[currentPhone].name !== nameInput) {
+      phoneInput.value = '';   // Tên đã thay đổi → xóa SĐT
+    }
+  }
 
+  // === Tự động điền nếu chỉ có 1 kết quả ===
   if (matches.length === 1) {
-    // Chỉ có 1 kết quả → tự điền
-    document.getElementById('phone').value = matches[0].phone;
-  } else {
-    // Nhiều khách trùng tên → hiện modal chọn
+    phoneInput.value = matches[0].phone;
+  } 
+  // === Nhiều kết quả → hiện modal chọn ===
+  else if (matches.length > 1) {
     showCustomerSelectModal(matches, nameInput);
   }
+  // Không có kết quả nào → đã xóa SĐT ở trên rồi
 }
 
 let timeout;
 function handleNameInput() {
   clearTimeout(timeout);
-  timeout = setTimeout(autoFillFromName, 300);
+  timeout = setTimeout(autoFillFromName, 250);  // Tăng nhẹ delay để mượt hơn
 }
 
 function loadData() {
@@ -1130,7 +1144,7 @@ console.log("Số lượng xe:", cars.length, "| Số hợp đồng:", contracts
       populateRevenueFilters();
 
       if (isFirstLoad) {
-        showToast("Chào mừng đến với Carrent");
+        showToast("CarRent đã sẵn sàng!");
         isFirstLoad = false;
       }
 
@@ -2493,7 +2507,7 @@ window.onload = async () => {
   });
 
 // Tự điền khách hàng
-  document.getElementById('customerName').addEventListener('input', autoFillFromName);
+  document.getElementById('customerName').addEventListener('input', handleNameInput);
 
   // Đóng modal khi click nền
   document.getElementById('customerSelectModal').addEventListener('click', function(e) {
