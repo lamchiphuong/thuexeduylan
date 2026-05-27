@@ -478,6 +478,125 @@
     .loading-overlay.show {
       display: flex;
     }
+
+        /* ==================== TAB PRO - FULL SCREEN ==================== */
+    #tab3 {
+        display: none;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #f8fafc;
+        min-height: 100vh;
+        max-width: 100%;
+        box-shadow: none;
+    }
+
+    #proLockedScreen {
+        padding: 20px;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #proContent {
+        display: none;           /* Mặc định ẩn */
+        height: calc(100vh - 55px);
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background: white;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 100;
+    }
+
+    #proIframe {
+        width: 100% !important;
+        height: 100% !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        position: relative;
+        z-index: 1;
+        transform: translateZ(0);
+    }
+
+    /* Tối ưu khi vào chế độ Pro */
+    body.pro-mode {
+        padding: 5px 0 0 0 !important;
+        background: #f8fafc;
+    }
+
+    body.pro-mode header,
+    body.pro-mode .tabs,
+    body.pro-mode .fab,
+    body.pro-mode .action-buttons,
+    body.pro-mode .version {
+        display: none !important;
+    }
+
+    /* Nút quay về Pro */
+    #proBackBtn {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 10000;
+        background: white;
+        color: #2563eb;
+        border: 2px solid #2563eb;
+        padding: 10px 16px;
+        border-radius: 50px;
+        font-weight: 600;
+        display: none;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    #proBackBtn:hover {
+        background: #2563eb;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    @media (max-width: 600px) {
+        #proBackBtn {
+            top: 15px;
+            left: 15px;
+            padding: 9px 14px;
+            font-size: 0.95rem;
+        }
+    }
+
+
+/* ==================== FIX POPUP MẠNH ==================== */
+#actionPopup {
+    z-index: 99999 !important;
+    isolation: isolate;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+}
+
+#actionPopup .action-popup-content {
+    z-index: 100000 !important;
+    position: relative !important;
+    box-shadow: 0 25px 70px rgba(0,0,0,0.4) !important;
+}
+
+/* Đảm bảo popup không bị ảnh hưởng bởi pro-mode */
+body.pro-mode #actionPopup {
+    z-index: 99999 !important;
+}
+.action-popup {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+}
   </style>
 </head>
 <body>
@@ -487,11 +606,12 @@
       <p class="subtitle">Quản lý thuê xe thông minh</p>
     </header>
 
-    <div class="tabs">
-      <div class="tab active" onclick="switchTab(0)">📋 Hợp đồng đang xử lý</div>
-      <div class="tab" onclick="switchTab(1)">🚗 Quản lý xe</div>
-      <div class="tab" onclick="switchTab(2)">📊 Lịch sử & Doanh thu</div>
-    </div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">📋 Hợp đồng đang xử lý</div>
+    <div class="tab" onclick="switchTab(1)">🚗 Quản lý xe</div>
+    <div class="tab" onclick="switchTab(2)">📊 Lịch sử & Doanh thu</div>
+    <div class="tab" onclick="switchTab(3)" id="proTab">⭐ Bộ quản lý Pro</div>
+  </div>
 
     <!-- Tab 0 -->
     <div id="tab0" class="card">
@@ -617,7 +737,6 @@
         <button onclick="exportRevenueToExcel()" class="btn btn-success" style="height: 48px;">
           <i class="fas fa-file-excel"></i> Xuất Excel
         </button>
-
       </div>
 
       <div style="background:#f0fdf4; border-radius:16px; padding:20px; margin-bottom:25px; display:flex; justify-content:space-between; align-items:center;">
@@ -651,7 +770,44 @@
         </table>
       </div>
     </div>
-  </div>
+
+    <!-- Tab 3: Bộ quản lý Pro - FULL SCREEN -->
+    <div id="tab3" style="display: none;">
+        <div id="proLockedScreen">
+            <div style="text-align:center; padding:40px 20px; max-width:460px; width:100%;">
+                <i class="fas fa-lock" style="font-size:4.5rem; color:#94a3b8; margin-bottom:25px;"></i>
+                <h3>Bạn cần License Pro để truy cập</h3>
+                <p style="color:#64748b; margin:20px auto;">
+                    Nhập license key bạn đã mua để mở khóa bộ công cụ Pro
+                </p>
+                
+                <input type="text" id="licenseInput" placeholder="Nhập License Key (ví dụ: PRO-2026-...)" 
+                       style="width:100%; padding:16px; font-size:1.1rem; margin:15px 0; border-radius:12px;">
+                
+                <div style="display: flex; gap: 12px; margin-top: 20px;">
+                    <button onclick="goBackToHome()" class="btn btn-secondary" style="flex:1; padding:14px;">
+                        <i class="fas fa-arrow-left"></i> Huỷ
+                    </button>
+                    <button onclick="activateProLicense()" class="btn btn-primary" style="flex:1; padding:14px;">
+                        <i class="fas fa-unlock"></i> Kích hoạt License
+                    </button>
+                </div>
+                
+                <div id="licenseMessage" style="margin-top:20px; min-height:24px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="proContent">
+          <!-- Nút quay về -->
+          <div id="proBackBtn" onclick="goBackToHome()">
+              <i class="fas fa-arrow-left"></i> Quay về Quản lý Hợp đồng
+          </div>
+
+          <iframe id="proIframe" 
+                  src="https://lamchiphuong.github.io/carrent-toolkit/" 
+                  allowfullscreen></iframe>
+    </div>
 
   <!-- FAB -->
   <div class="fab" onclick="showAddContractModal()"><i class="fas fa-plus"></i></div>
@@ -951,7 +1107,7 @@
   </div>
 
   <div class="version">
-    CarRent v1.3.3 - 2026
+    CarRent v1.3.4 - 2026
   </div>
 
   <!-- Loading Overlay -->
@@ -1446,46 +1602,68 @@ function closeCustomerSelectModal() {
 
 // ====================== POP-UP HÀNH ĐỘNG ======================
 function showActionPopup(id) {
-  currentActionContractId = id;
-  const contract = contracts.find(c => c.id === id);
-  if (!contract) return;
+    currentActionContractId = id;
+    const contract = contracts.find(c => c.id === id);
+    if (!contract) return;
 
-  document.getElementById('popupContractTitle').textContent = contract.customer;
+    document.getElementById('popupContractTitle').textContent = contract.customer || 'Hợp đồng';
 
-  const rentHalfText = (contract.rentHalf || 'full') === 'half' ? '<span style="color:#d97706;"> (½ ngày đầu)</span>' : '';
-  const returnHalfText = (contract.returnHalf || 'full') === 'half' ? '<span style="color:#d97706;"> (½ ngày cuối)</span>' : '';
+    const rentHalfText = (contract.rentHalf || 'full') === 'half' ? '<span style="color:#d97706;"> (½ ngày đầu)</span>' : '';
+    const returnHalfText = (contract.returnHalf || 'full') === 'half' ? '<span style="color:#d97706;"> (½ ngày cuối)</span>' : '';
 
-  let infoHTML = `
-    <strong>Xe:</strong> ${contract.carType} - ${contract.plate}<br>
-    <strong>Nhận:</strong> ${formatDate(contract.rentDate)} ${contract.rentTime || ''} 
-    ${contract.rentDayType === "homtruoc" ? '(tối hôm trước)' : ''}${rentHalfText}<br>
-    <strong>Trả:</strong> ${formatDate(contract.returnDate)} ${contract.returnTime || ''}${returnHalfText}<br>
-    <strong>Tổng tiền:</strong> <span style="color:#16a34a;font-weight:600;">${formatMoney(calculateTotal(contract))} ₫</span><br>
-    <strong>Cọc:</strong> ${formatMoney(contract.deposit || 0)} ₫ | 
-    <strong>Còn lại:</strong> <span style="color:${calculateRemaining(contract) === 0 ? '#16a34a' : '#ea580c'};">${formatMoney(calculateRemaining(contract))} ₫</span>
-  `;
-  document.getElementById('popupContractInfo').innerHTML = infoHTML;
+    let infoHTML = `
+        <strong>Xe:</strong> ${contract.carType} - ${contract.plate}<br>
+        <strong>Nhận:</strong> ${formatDate(contract.rentDate)} ${contract.rentTime || ''} 
+        ${contract.rentDayType === "homtruoc" ? '(tối hôm trước)' : ''}${rentHalfText}<br>
+        <strong>Trả:</strong> ${formatDate(contract.returnDate)} ${contract.returnTime || ''}${returnHalfText}<br>
+        <strong>Tổng tiền:</strong> <span style="color:#16a34a;font-weight:600;">${formatMoney(calculateTotal(contract))} ₫</span><br>
+        <strong>Cọc:</strong> ${formatMoney(contract.deposit || 0)} ₫ | 
+        <strong>Còn lại:</strong> <span style="color:${calculateRemaining(contract) === 0 ? '#16a34a' : '#ea580c'};">${formatMoney(calculateRemaining(contract))} ₫</span>
+    `;
+    document.getElementById('popupContractInfo').innerHTML = infoHTML;
 
-  const receiveBtn = document.getElementById('receiveBtnPopup');
-  const returnBtn = document.getElementById('returnBtnPopup');
+    // Xử lý nút
+    const receiveBtn = document.getElementById('receiveBtnPopup');
+    const returnBtn = document.getElementById('returnBtnPopup');
 
-  if (contract.status === "Chưa nhận xe") {
-    receiveBtn.style.display = 'flex';
-    returnBtn.style.display = 'none';
-  } else if (contract.status === "Đang thuê") {
-    receiveBtn.style.display = 'none';
-    returnBtn.style.display = 'flex';
-  } else {
-    receiveBtn.style.display = 'none';
-    returnBtn.style.display = 'none';
-  }
+    if (contract.status === "Chưa nhận xe") {
+        receiveBtn.style.display = 'flex';
+        returnBtn.style.display = 'none';
+    } else if (contract.status === "Đang thuê") {
+        receiveBtn.style.display = 'none';
+        returnBtn.style.display = 'flex';
+    } else {
+        receiveBtn.style.display = 'none';
+        returnBtn.style.display = 'none';
+    }
 
-  document.getElementById('actionPopup').style.display = 'flex';
+    // FIX CHÍNH: Hiển thị popup mạnh tay
+    const popup = document.getElementById('actionPopup');
+    popup.style.display = 'flex';
+    popup.style.opacity = '1';
+    popup.style.visibility = 'visible';
+    popup.style.zIndex = '9999';
+    
+    // Force repaint mạnh
+    popup.style.transform = 'translateZ(0)';
+    popup.offsetHeight;
+
+    requestAnimationFrame(() => {
+        popup.style.display = 'flex';
+        popup.style.opacity = '1';
+
+        requestAnimationFrame(() => {
+            popup.classList.add('show');
+        });
+    });
 }
 
 function closeActionPopup() {
-  document.getElementById('actionPopup').style.display = 'none';
-  currentActionContractId = null;
+    const popup = document.getElementById('actionPopup');
+    popup.style.display = 'none';
+    popup.style.opacity = '0';
+    popup.style.zIndex = '2500';
+    currentActionContractId = null;
 }
 
 function editFromPopup() {
@@ -1674,6 +1852,7 @@ function isOverdue(contract) {
 }
 
 // ====================== RENDER ======================
+// ====================== RENDER HỢP ĐỒNG ĐANG XỬ LÝ ======================
 function renderActiveContracts() {
   const tbody = document.getElementById('activeContractBody');
   tbody.innerHTML = '';
@@ -1693,71 +1872,96 @@ function renderActiveContracts() {
     filtered = filtered.filter(c => c.status === currentStatusFilter);
   }
 
-  // SẮP XẾP THEO NGÀY NHẬN XE TĂNG DẦN (cũ nhất lên trên)
-  filtered.sort((a, b) => {
-    return new Date(a.rentDate) - new Date(b.rentDate);
-  });
+  filtered.sort((a, b) => new Date(a.rentDate) - new Date(b.rentDate));
+
+  console.log(`✅ Đã render ${filtered.length} hợp đồng đang xử lý`);
 
   filtered.forEach(contract => {
-    const totalMoney = calculateTotal(contract);
-    const extra = calculateExtraTotal(contract);
-    const discountAmt = contract.discount || 0;
-    const remain = calculateRemaining(contract);
-    const days = calculateDays(contract.rentDate, contract.returnDate);
+    try {
+      const totalMoney = calculateTotal(contract);
+      const extra = calculateExtraTotal(contract);
+      const remain = calculateRemaining(contract);
+      const days = calculateDays(contract.rentDate, contract.returnDate);
 
-    let statusHTML = `<span class="status ${contract.status.toLowerCase().replace(/ /g,'-')}">${contract.status}</span>`;
-    if (contract.status === "Đang thuê" && contract.fullPaymentReceived) {
-      statusHTML = `<span class="status dang-thue-paid">Đang thuê (đã thu đủ)</span>`;
+      let statusHTML = `<span class="status ${contract.status.toLowerCase().replace(/ /g,'-')}">${contract.status}</span>`;
+      if (contract.status === "Đang thuê" && contract.fullPaymentReceived) {
+        statusHTML = `<span class="status dang-thue-paid">Đang thuê (đã thu đủ)</span>`;
+      }
+
+      const typeLabel = contract.contractType === 'app' 
+        ? `<span style="background:#dbeafe;color:#1e40af;padding:4px 10px;border-radius:20px;font-size:0.8rem;">Đặt qua app</span>`
+        : `<span style="background:#f3e8ff;color:#6b21a8;padding:4px 10px;border-radius:20px;font-size:0.8rem;">Thuê thường</span>`;
+
+      let totalHTML = `<strong style="color:#16a34a;">${formatMoney(totalMoney)} ₫</strong> <small>(${days} ngày)</small>`;
+      if (extra > 0) totalHTML += `<div class="note">+ Phụ phí: ${formatMoney(extra)} ₫</div>`;
+      if ((contract.discount || 0) > 0) totalHTML += `<div class="note">- Giảm giá: ${formatMoney(contract.discount)} ₫</div>`;
+
+      const rentHalfText = (contract.rentHalf || 'full') === 'half' ? ' <small style="color:#d97706;">(½ ngày đầu)</small>' : '';
+      const returnHalfText = (contract.returnHalf || 'full') === 'half' ? ' <small style="color:#d97706;">(½ ngày cuối)</small>' : '';
+
+      const rentNote = contract.rentDayType === "homtruoc" 
+        ? `<small class="note">Nhận: ${contract.rentTime || ''} (tối hôm trước)${rentHalfText}</small>` 
+        : `<small class="note">Nhận: ${contract.rentTime || ''}${rentHalfText}</small>`;
+
+      const returnNote = `<small class="note">Trả: ${contract.returnTime || ''}${returnHalfText}</small>`;
+
+      const noteShort = contract.activeNote 
+        ? (contract.activeNote.length > 30 ? contract.activeNote.substring(0,30) + '...' : contract.activeNote) 
+        : '<small style="color:#94a3b8;">—</small>';
+
+      const tr = document.createElement('tr');
+      tr.style.cursor = 'pointer';
+      
+      tr.addEventListener('click', function(e) {
+          if (e.target.closest('button') || 
+              e.target.closest('select') || 
+              e.target.closest('.note') || 
+              e.target.closest('small')) {
+              return;
+          }
+          e.stopImmediatePropagation();
+          showActionPopup(contract.id);
+      });
+      let rowClass = '';
+      if (contract.status === "Chưa nhận xe" && isReceiveToday(contract)) rowClass = 'waiting-today';
+      else if (contract.status === "Đang thuê") {
+        if (isOverdue(contract)) rowClass = 'overdue';
+        else if (isReturnToday(contract)) rowClass = 'due-today';
+      }
+      tr.className = rowClass;
+
+      tr.innerHTML = `
+        <td><strong>${contract.customer || ''}</strong></td>
+        <td>${contract.phone || ''}</td>
+        <td>${contract.carType || ''}</td>
+        <td><strong>${contract.plate || ''}</strong></td>
+        <td>${typeLabel}</td>
+        <td>${formatDate(contract.rentDate)}<br>${rentNote}</td>
+        <td>${formatDate(contract.returnDate)}<br>${returnNote}</td>
+        <td>${totalHTML}</td>
+        <td style="color:#16a34a;font-weight:600;">${formatMoney(contract.deposit||0)} ₫</td>
+        <td style="color:${remain===0?'#16a34a':'#ea580c'};font-weight:600;">
+          ${remain === 0 ? `0 ₫ <small style="color:#16a34a;">(Đã thu đủ)</small>` : `${formatMoney(remain)} ₫`}
+        </td>
+        <td>${statusHTML}</td>
+        <td>${noteShort}</td>
+      `;
+
+      tbody.appendChild(tr);
+    } catch (err) {
+      console.error("❌ Lỗi render hợp đồng ID:", contract.id, err);
     }
-
-    const typeLabel = contract.contractType === 'app' 
-      ? `<span style="background:#dbeafe;color:#1e40af;padding:4px 10px;border-radius:20px;font-size:0.8rem;">Đặt qua app</span>`
-      : `<span style="background:#f3e8ff;color:#6b21a8;padding:4px 10px;border-radius:20px;font-size:0.8rem;">Thuê thường</span>`;
-
-    let totalHTML = `<strong style="color:#16a34a;">${formatMoney(totalMoney)} ₫</strong> <small>(${days} ngày)</small>`;
-    if (extra > 0) totalHTML += `<div class="note">+ Phụ phí: ${formatMoney(extra)} ₫</div>`;
-    if (discountAmt > 0) totalHTML += `<div class="note">- Giảm giá: ${formatMoney(discountAmt)} ₫</div>`;
-
-    const rentHalfText = (contract.rentHalf || 'full') === 'half' ? ' <small style="color:#d97706;">(½ ngày đầu)</small>' : '';
-    const returnHalfText = (contract.returnHalf || 'full') === 'half' ? ' <small style="color:#d97706;">(½ ngày cuối)</small>' : '';
-
-    const rentNote = contract.rentDayType === "homtruoc" 
-      ? `<small class="note">Nhận: ${contract.rentTime} (tối hôm trước)${rentHalfText}</small>` 
-      : `<small class="note">Nhận: ${contract.rentTime}${rentHalfText}</small>`;
-
-    const returnNote = `<small class="note">Trả: ${contract.returnTime}${returnHalfText}</small>`;
-
-    const noteShort = contract.activeNote 
-      ? (contract.activeNote.length > 30 ? contract.activeNote.substring(0,30) + '...' : contract.activeNote) 
-      : '<small style="color:#94a3b8;">—</small>';
-
-    const tr = document.createElement('tr');
-    tr.onclick = () => showActionPopup(contract.id);
-
-    let rowClass = '';
-    if (contract.status === "Chưa nhận xe" && isReceiveToday(contract)) rowClass = 'waiting-today';
-    else if (contract.status === "Đang thuê") {
-      if (isOverdue(contract)) rowClass = 'overdue';
-      else if (isReturnToday(contract)) rowClass = 'due-today';
-    }
-    tr.className = rowClass;
-
-    tr.innerHTML = `
-      <td><strong>${contract.customer || ''}</strong></td>
-      <td>${contract.phone || ''}</td>
-      <td>${contract.carType || ''}</td>
-      <td><strong>${contract.plate || ''}</strong></td>
-      <td>${typeLabel}</td>
-      <td>${formatDate(contract.rentDate)}<br>${rentNote}</td>
-      <td>${formatDate(contract.returnDate)}<br>${returnNote}</td>
-      <td>${totalHTML}</td>
-      <td style="color:#16a34a;font-weight:600;">${formatMoney(contract.deposit||0)} ₫</td>
-      <td style="color:${remain===0?'#16a34a':'#ea580c'};font-weight:600;">${remain === 0 ? `0 ₫ <small style="color:#16a34a;">(Đã thu đủ)</small>` : `${formatMoney(remain)} ₫`}</td>
-      <td>${statusHTML}</td>
-      <td>${noteShort}</td>
-    `;
-    tbody.appendChild(tr);
   });
+}
+
+// Hàm hỗ trợ lấy class màu hàng
+function getRowClass(contract) {
+  if (contract.status === "Chưa nhận xe" && isReceiveToday(contract)) return 'waiting-today';
+  if (contract.status === "Đang thuê") {
+    if (isOverdue(contract)) return 'overdue';
+    if (isReturnToday(contract)) return 'due-today';
+  }
+  return '';
 }
 
 function renderCars() {
@@ -2034,12 +2238,44 @@ function renderAll() {
 }
 
 function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===tab));
-  document.getElementById('tab0').style.display = tab===0 ? 'block' : 'none';
-  document.getElementById('tab1').style.display = tab===1 ? 'block' : 'none';
-  document.getElementById('tab2').style.display = tab===2 ? 'block' : 'none';
+    // Active tab
+    document.querySelectorAll('.tab').forEach((t, i) => {
+        t.classList.toggle('active', i === tab);
+    });
+
+    // Ẩn tất cả tab chính
+    document.getElementById('tab0').style.display = 'none';
+    document.getElementById('tab1').style.display = 'none';
+    document.getElementById('tab2').style.display = 'none';
+    document.getElementById('tab3').style.display = 'none';
+
+    if (tab === 3) {
+        // === VÀO TAB PRO ===
+        document.body.classList.add('pro-mode');
+        document.getElementById('tab3').style.display = 'block';           // ← Quan trọng
+        document.getElementById('proContent').style.display = 'block';
+        document.getElementById('proBackBtn').style.display = 'flex';
+        
+        checkProAccess();   // Quyết định hiện Locked hay Full Pro
+    } 
+    else {
+        // === TAB THƯỜNG ===
+        document.body.classList.remove('pro-mode');
+        document.getElementById('proContent').style.display = 'none';
+        document.getElementById('proBackBtn').style.display = 'none';
+        
+        if (tab === 0) document.getElementById('tab0').style.display = 'block';
+        else if (tab === 1) document.getElementById('tab1').style.display = 'block';
+        else if (tab === 2) document.getElementById('tab2').style.display = 'block';
+    }
 }
 
+function goBackToHome() {
+    document.getElementById('proContent').style.display = 'none';
+    document.getElementById('proBackBtn').style.display = 'none';
+    document.body.classList.remove('pro-mode');
+    switchTab(0);
+}
 // ====================== MODAL FUNCTIONS ======================
 function showAddContractModal() {
   document.getElementById('contractModalTitle').textContent = "Thêm hợp đồng thuê xe";
@@ -2517,12 +2753,12 @@ window.onload = async () => {
   document.getElementById('actionPopup').addEventListener('click', function(e) {
     if (e.target === this) closeActionPopup();
   });
+  // Kiểm tra license khi load
+if (document.getElementById('tab3').style.display === 'block') {
+  checkProAccess();
+}
 
-  document.getElementById('actionPopup').addEventListener('click', function(e) {
-    if (e.target === this) closeActionPopup();
-  });
-
-  console.log("🚀 CarRent v1.3.3");
+  console.log("🚀 CarRent v1.3.4");
 };
 
 function formatPriceInput(e) {
@@ -2609,6 +2845,49 @@ function exportRevenueToExcel() {
   XLSX.writeFile(wb, fileName);
   showToast(`Đã xuất file: <strong>${fileName}</strong>`);
 }
+
+// ==================== PRO LICENSE ====================
+const PRO_LICENSE_KEY = "PRO-2026-CARRENT-PHUONG123"; // ← Bạn có thể thay key này
+
+function isProUnlocked() {
+  return localStorage.getItem('proLicense') === 'unlocked';
+}
+
+function activateProLicense() {
+  const input = document.getElementById('licenseInput').value.trim().toUpperCase();
+  const messageEl = document.getElementById('licenseMessage');
+
+  if (input === PRO_LICENSE_KEY) {
+    localStorage.setItem('proLicense', 'unlocked');
+    
+    db.ref('/proLicense').set({
+      status: 'unlocked',
+      activatedAt: new Date().toISOString()
+    });
+
+    messageEl.innerHTML = `<span style="color:#16a34a;">✅ Kích hoạt thành công! Đang tải...</span>`;
+    setTimeout(() => {
+      document.getElementById('proLockedScreen').style.display = 'none';
+      document.getElementById('proContent').style.display = 'block';
+    }, 800);
+  } else {
+    messageEl.innerHTML = `<span style="color:#dc2626;">❌ License không hợp lệ. Vui lòng liên hệ admin.</span>`;
+  }  // ← ĐÃ SỬA
+}
+
+function checkProAccess() {
+    const lockedScreen = document.getElementById('proLockedScreen');
+    const proContent = document.getElementById('proContent');
+
+    if (isProUnlocked()) {
+        lockedScreen.style.display = 'none';
+        proContent.style.display = 'block';
+    } else {
+        lockedScreen.style.display = 'flex';      // ← Sửa thành flex
+        proContent.style.display = 'none';
+    }
+}
+
 </script>
 </body>
 </html>
