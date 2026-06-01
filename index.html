@@ -1835,6 +1835,17 @@ function isReceiveToday(contract) {
   return realDate.getTime() === today.getTime();
 }
 
+// Hàm mới: Kiểm tra đã đến ngày nhận hoặc quá ngày nhận
+function isReceivePastOrToday(contract) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const realDate = getRealReceiveDate(contract);
+  realDate.setHours(0, 0, 0, 0);
+  
+  return realDate.getTime() <= today.getTime();   // <= nghĩa là hôm nay hoặc trước đó
+}
+
 function isReturnToday(contract) {
   const today = new Date();
   today.setHours(0,0,0,0);
@@ -1923,7 +1934,11 @@ function renderActiveContracts() {
           showActionPopup(contract.id);
       });
       let rowClass = '';
-      if (contract.status === "Chưa nhận xe" && isReceiveToday(contract)) rowClass = 'waiting-today';
+
+      // === ĐỔI MÀU XANH DƯƠNG cho tất cả hợp đồng "Chưa nhận xe" đã đến hoặc quá ngày nhận ===
+      if (contract.status === "Chưa nhận xe" && isReceivePastOrToday(contract)) {
+        rowClass = 'waiting-today';
+      } 
       else if (contract.status === "Đang thuê") {
         if (isOverdue(contract)) rowClass = 'overdue';
         else if (isReturnToday(contract)) rowClass = 'due-today';
