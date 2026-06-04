@@ -5,46 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CarRent - Quản Lý Thuê Xe</title>
   
-<!-- ==================== PWA ICONS & MANIFEST ==================== -->
-
-<!-- Favicon cơ bản -->
-<link rel="icon" type="image/png" sizes="32x32" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
-<link rel="icon" type="image/png" sizes="192x192" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
+<!-- Icon cơ bản cho tab browser -->
 <link rel="icon" type="image/png" sizes="512x512" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
 
-<!-- Apple (iOS) -->
+<!-- Icon cho Android Chrome (Add to Home Screen) -->
+<link rel="icon" sizes="192x192" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
+<link rel="shortcut icon" sizes="196x196" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
+
+<!-- iOS (giữ nguyên) -->
+<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
 <link rel="apple-touch-icon" sizes="180x180" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
+
+<!-- Meta tags hỗ trợ -->
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="CarRent">
 
-<!-- Android Chrome -->
-<meta name="theme-color" content="#2563eb">
-<meta name="mobile-web-app-capable" content="yes">
-
-<!-- Manifest (phiên bản sạch hơn) -->
-<link rel="manifest" href="data:application/manifest+json,{
-  &quot;name&quot;:&quot;CarRent - Quản Lý Thuê Xe&quot;,
-  &quot;short_name&quot;:&quot;CarRent&quot;,
-  &quot;description&quot;:&quot;Quản lý thuê xe thông minh&quot;,
-  &quot;start_url&quot;:&quot;.&quot;,
-  &quot;display&quot;:&quot;standalone&quot;,
-  &quot;background_color&quot;:&quot;#f8fafc&quot;,
-  &quot;theme_color&quot;:&quot;#2563eb&quot;,
-  &quot;icons&quot;: [
-    {
-      &quot;src&quot;: &quot;https://cdn-icons-png.flaticon.com/512/19006/19006139.png&quot;,
-      &quot;sizes&quot;: &quot;192x192&quot;,
-      &quot;type&quot;: &quot;image/png&quot;
-    },
-    {
-      &quot;src&quot;: &quot;https://cdn-icons-png.flaticon.com/512/19006/19006139.png&quot;,
-      &quot;sizes&quot;: &quot;512x512&quot;,
-      &quot;type&quot;: &quot;image/png&quot;,
-      &quot;purpose&quot;: &quot;any maskable&quot;
-    }
-  ]
-}">
+  <link rel="manifest" href="data:application/manifest+json,{
+    &quot;name&quot;:&quot;CarRent - Quản Lý Thuê Xe&quot;,
+    &quot;short_name&quot;:&quot;CarRent&quot;,
+    &quot;description&quot;:&quot;Quản lý thuê xe thông minh&quot;,
+    &quot;start_url&quot;:&quot;.&quot;,
+    &quot;display&quot;:&quot;standalone&quot;,
+    &quot;background_color&quot;:&quot;#f8fafc&quot;,
+    &quot;theme_color&quot;:&quot;#2563eb&quot;,
+    &quot;icons&quot;:[{
+      &quot;src&quot;:&quot;https://cdn-icons-png.flaticon.com/512/19006/19006139.png&quot;,
+      &quot;sizes&quot;:&quot;512x512&quot;,
+      &quot;type&quot;:&quot;image/png&quot;,
+      &quot;purpose&quot;:&quot;any maskable&quot;
+    }]
+  }">
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -618,9 +611,47 @@ body.pro-mode #actionPopup {
     will-change: transform, opacity;
     transform: translateZ(0);
 }
+
+#loginModal .modal-content {
+  animation: modalPop 0.4s ease;
+}
   </style>
 </head>
 <body>
+<!-- LOGIN MODAL -->
+<div id="loginModal" class="modal" style="display: flex;">
+  <div class="modal-content" style="max-width: 420px;">
+    <div class="modal-header">
+      <h2><i class="fas fa-user-lock"></i> Đăng nhập CarRent</h2>
+      <span class="close" onclick="logout()" style="display:none;">×</span>
+    </div>
+    
+    <div style="padding: 20px 10px;">
+      <label>Tài khoản</label>
+      <select id="usernameSelect" style="width:100%; padding:14px; margin-bottom:15px; border-radius:12px;">
+        <option value="">Chọn tài khoản</option>
+        <option value="baduy">Ba Duy</option>
+        <option value="70h15591">70H-15591</option>
+      </select>
+
+      <label>Mật khẩu</label>
+      <div style="position: relative; margin-bottom:20px;">
+        <input type="password" id="passwordInput" placeholder="Nhập mật khẩu" 
+               style="width:100%; padding:14px 45px 14px 14px; border-radius:12px;">
+        <span id="togglePassword" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #64748b; font-size: 1.3rem;">
+          <i class="fas fa-eye"></i>
+        </span>
+      </div>
+
+      <button onclick="handleLogin()" class="btn btn-primary" style="width:100%; padding:14px; font-size:1.1rem;">
+        <i class="fas fa-sign-in-alt"></i> Đăng nhập
+      </button>
+
+      <div id="loginMessage" style="margin-top:15px; text-align:center; min-height:24px;"></div>
+    </div>
+  </div>
+</div>
+
   <div class="container">
     <header>
       <h1><i class="fas fa-car"></i> CarRent</h1>
@@ -1143,7 +1174,7 @@ body.pro-mode #actionPopup {
 <script>
 // ==================== FIREBASE CONFIG ====================
 const firebaseConfig = {
-  databaseURL: "https://carrent-2026-default-rtdb.asia-southeast1.firebasedatabase.appp/"
+  databaseURL: "https://carrent-2026-default-rtdb.asia-southeast1.firebasedatabase.app/"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -1172,7 +1203,99 @@ let currentRevenueType = '';
 let currentContractType = 'normal';
 let currentActionContractId = null;
 
+// ==================== LOGIN SYSTEM ====================
+let currentUser = null;           // { username, role, plateFilter }
+const USERS = {
+  "baduy": {
+    name: "Ba Duy",
+    password: "duylan1235",
+    role: "full"
+  },
+  "70h15591": {
+    name: "70H-15591",
+    password: "carrent123",
+    role: "limited",
+    plateFilter: "70H-15591"
+  }
+};
+
+function handleLogin() {
+  const username = document.getElementById('usernameSelect').value;
+  const password = document.getElementById('passwordInput').value.trim();
+  const messageEl = document.getElementById('loginMessage');
+
+  if (!username) {
+    messageEl.innerHTML = `<span style="color:#dc2626;">Vui lòng chọn tài khoản</span>`;
+    return;
+  }
+
+  const user = USERS[username];
+  if (user && user.password === password) {
+    currentUser = {
+      username: username,
+      name: user.name,
+      role: user.role,
+      plateFilter: user.plateFilter
+    };
+
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    document.getElementById('loginModal').style.display = 'none';
+    showToast(`Đăng nhập thành công: ${user.name}`);
+    
+    renderAll();           // Render lại dữ liệu theo quyền
+  } else {
+    messageEl.innerHTML = `<span style="color:#dc2626;">❌ Sai mật khẩu!</span>`;
+    document.getElementById('passwordInput').value = '';
+  }
+}
+
+function logout() {
+  if (confirm("Bạn có chắc muốn đăng xuất?")) {
+    currentUser = null;
+    localStorage.removeItem('currentUser');
+    document.getElementById('loginModal').style.display = 'flex';
+    document.getElementById('passwordInput').value = '';
+  }
+}
+
+// Kiểm tra đăng nhập khi load
+function checkLogin() {
+  const savedUser = localStorage.getItem('currentUser');
+  if (savedUser) {
+    currentUser = JSON.parse(savedUser);
+    document.getElementById('loginModal').style.display = 'none';
+  }
+}
+
 // ==================== HELPER FUNCTIONS (giữ nguyên) ====================
+// Thêm hàm này vào phần HELPER FUNCTIONS
+function getFilteredContracts() {
+    let filtered = contracts;
+
+    // Lọc theo biển số cho tài khoản limited
+    if (currentUser && currentUser.role === "limited" && currentUser.plateFilter) {
+        filtered = filtered.filter(c => c.plate === currentUser.plateFilter);
+    }
+
+    // === LỌC LỊCH SỬ CHO 70H-15591: chỉ từ tháng 6/2026 ===
+    if (currentUser && currentUser.username === "70h15591") {
+        const cutoffDate = new Date("2026-06-01");
+        filtered = filtered.filter(c => {
+            if (c.status !== "Đã hoàn tất") return true; // vẫn xem bình thường các hợp đồng đang xử lý
+            const rentDate = new Date(c.rentDate);
+            return rentDate >= cutoffDate;
+        });
+    }
+
+    return filtered;
+}
+
+function getFilteredCars() {
+    if (currentUser && currentUser.role === "limited" && currentUser.plateFilter) {
+        return cars.filter(c => c.plate === currentUser.plateFilter);
+    }
+    return cars;
+}
 function formatMoney(num) {
   return Number(num || 0).toLocaleString('vi-VN').replace(/,/g, ' ');
 }
@@ -1889,7 +2012,8 @@ function renderActiveContracts() {
   const tbody = document.getElementById('activeContractBody');
   tbody.innerHTML = '';
 
-  let filtered = contracts.filter(c => c.status !== "Đã hoàn tất");
+  // Lọc theo quyền người dùng
+  let filtered = getFilteredContracts().filter(c => c.status !== "Đã hoàn tất");
 
   if (currentSearch) {
     const term = currentSearch.toLowerCase();
@@ -1905,8 +2029,6 @@ function renderActiveContracts() {
   }
 
   filtered.sort((a, b) => new Date(a.rentDate) - new Date(b.rentDate));
-
-  console.log(`✅ Đã render ${filtered.length} hợp đồng đang xử lý`);
 
   filtered.forEach(contract => {
     try {
@@ -1945,22 +2067,18 @@ function renderActiveContracts() {
       tr.style.cursor = 'pointer';
       
       tr.addEventListener('click', function(e) {
-          if (e.target.closest('button') || 
-              e.target.closest('select') || 
-              e.target.closest('.note') || 
-              e.target.closest('small')) {
-              return;
-          }
-          e.stopImmediatePropagation();
-          showActionPopup(contract.id);
+        if (e.target.closest('button') || e.target.closest('select') || 
+            e.target.closest('.note') || e.target.closest('small')) {
+          return;
+        }
+        e.stopImmediatePropagation();
+        showActionPopup(contract.id);
       });
-      let rowClass = '';
 
-      // === ĐỔI MÀU XANH DƯƠNG cho tất cả hợp đồng "Chưa nhận xe" đã đến hoặc quá ngày nhận ===
+      let rowClass = '';
       if (contract.status === "Chưa nhận xe" && isReceivePastOrToday(contract)) {
         rowClass = 'waiting-today';
-      } 
-      else if (contract.status === "Đang thuê") {
+      } else if (contract.status === "Đang thuê") {
         if (isOverdue(contract)) rowClass = 'overdue';
         else if (isReturnToday(contract)) rowClass = 'due-today';
       }
@@ -2004,16 +2122,17 @@ function renderCars() {
   const tbody = document.getElementById('carBody');
   tbody.innerHTML = '';
   
-  cars.forEach(car => {
+  const displayCars = getFilteredCars();
+
+  displayCars.forEach(car => {
     const busy = contracts.some(c => c.plate === car.plate && c.status !== "Đã hoàn tất");
     const statusHTML = busy ? 
       `<span class="status busy">Đang có lịch</span>` : 
       `<span class="status available">Đang rảnh</span>`;
 
     const tr = document.createElement('tr');
-    tr.style.cursor = 'pointer';                    // Thêm con trỏ tay
+    tr.style.cursor = 'pointer';
     tr.onclick = (e) => {
-      // Nếu click vào button thì không mở lịch (ngăn event bubble)
       if (e.target.closest('button')) return;
       showCarSchedule(car.id);
     };
@@ -2045,6 +2164,7 @@ function renderCars() {
     tbody.appendChild(tr);
   });
 }
+
 function populateRevenueFilters() {
   // Populate Năm
   const years = new Set();
@@ -2111,9 +2231,15 @@ function renderCompletedContracts() {
   tbody.innerHTML = '';
   let totalRevenue = 0;
 
-  let filtered = contracts.filter(c => c.status === "Đã hoàn tất");
+  let filtered = getFilteredContracts().filter(c => c.status === "Đã hoàn tất");
 
-  // === BỘ LỌC ĐẦY ĐỦ ===
+  // Bộ lọc thêm cho user 70H-15591 (để chắc chắn)
+  if (currentUser && currentUser.username === "70h15591") {
+    const cutoffDate = new Date("2026-06-01");
+    filtered = filtered.filter(c => new Date(c.rentDate) >= cutoffDate);
+  }
+
+  // Các bộ lọc người dùng chọn
   if (currentRevenueYear) {
     filtered = filtered.filter(c => new Date(c.rentDate).getFullYear().toString() === currentRevenueYear);
   }
@@ -2127,7 +2253,6 @@ function renderCompletedContracts() {
     filtered = filtered.filter(c => (c.contractType || 'normal') === currentRevenueType);
   }
 
-  // Sắp xếp theo ngày nhận xe
   filtered.sort((a, b) => new Date(a.rentDate) - new Date(b.rentDate));
 
   // Tiêu đề động
@@ -2142,7 +2267,6 @@ function renderCompletedContracts() {
   if (currentRevenueType) {
     titleText += currentRevenueType === 'app' ? " (Đặt qua app)" : " (Thuê thường)";
   }
-
   document.getElementById('revenueTitle').textContent = titleText;
 
   filtered.forEach(contract => {
@@ -2703,8 +2827,25 @@ document.getElementById('carForm').addEventListener('submit', e => {
   saveData();   // ← thay saveData(); thành cái này
 });
 
+// ==================== TOGGLE MẬT KHẨU ====================
+function togglePasswordVisibility() {
+  const passwordInput = document.getElementById('passwordInput');
+  const toggleIcon = document.getElementById('togglePassword');
+
+  if (passwordInput.type === "password") {
+    passwordInput.type = "text";
+    toggleIcon.innerHTML = `<i class="fas fa-eye-slash"></i>`;
+  } else {
+    passwordInput.type = "password";
+    toggleIcon.innerHTML = `<i class="fas fa-eye"></i>`;
+  }
+}
+
+// Thêm event listener sau khi DOM load
+
 // ====================== KHỞI ĐỘNG ======================
 window.onload = async () => {
+  checkLogin();
   await loadData();
       // === MIGRATION: Sửa dữ liệu cũ có undefined ===
       contracts.forEach(c => {
@@ -2923,7 +3064,11 @@ function checkProAccess() {
         proContent.style.display = 'none';
     }
 }
-
+// Toggle mật khẩu
+const toggleBtn = document.getElementById('togglePassword');
+if (toggleBtn) {
+  toggleBtn.addEventListener('click', togglePasswordVisibility);
+}
 </script>
 </body>
 </html>
