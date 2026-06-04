@@ -2,7 +2,7 @@
   "name": "CarRent",
   "short_name": "CarRent",
   "description": "Ứng dụng cho thuê xe",
-  "start_url": "/?utm_source=homescreen",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
