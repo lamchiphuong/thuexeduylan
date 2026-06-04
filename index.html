@@ -5,23 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CarRent - Quản Lý Thuê Xe</title>
   
-<!-- Icon cơ bản cho tab browser -->
-<link rel="icon" type="image/png" sizes="512x512" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
-
-<!-- Icon cho Android Chrome (Add to Home Screen) -->
-<link rel="icon" sizes="192x192" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
-<link rel="shortcut icon" sizes="196x196" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
-
-<!-- iOS (giữ nguyên) -->
-<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
-<link rel="apple-touch-icon" sizes="180x180" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
-
-<!-- Meta tags hỗ trợ -->
-<meta name="theme-color" content="#000000">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="CarRent">
+  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
 
   <link rel="manifest" href="data:application/manifest+json,{
     &quot;name&quot;:&quot;CarRent - Quản Lý Thuê Xe&quot;,
@@ -611,97 +597,14 @@ body.pro-mode #actionPopup {
     will-change: transform, opacity;
     transform: translateZ(0);
 }
-
-#loginModal .modal-content {
-  animation: modalPop 0.4s ease;
-}
-
-/* === USER INFO & LOGOUT === */
-.user-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: white;
-    padding: 8px 16px;
-    border-radius: 50px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-    margin-bottom: 15px;
-}
-
-.user-name {
-    font-weight: 600;
-    color: var(--primary-dark);
-}
-
-.logout-btn {
-    padding: 6px 14px;
-    font-size: 0.9rem;
-    background: #ef4444;
-    color: white;
-    border: none;
-    border-radius: 30px;
-    cursor: pointer;
-}
-
-.logout-btn:hover {
-    background: #dc2626;
-}
-
   </style>
 </head>
 <body>
-<!-- LOGIN MODAL -->
-<div id="loginModal" class="modal" style="display: flex;">
-  <div class="modal-content" style="max-width: 420px;">
-    <div class="modal-header">
-      <h2><i class="fas fa-user-lock"></i> Đăng nhập CarRent</h2>
-      <span class="close" onclick="logout()" style="display:none;">×</span>
-    </div>
-    
-    <div style="padding: 20px 10px;">
-      <label>Tài khoản</label>
-      <select id="usernameSelect" style="width:100%; padding:14px; margin-bottom:15px; border-radius:12px;">
-        <option value="">Chọn tài khoản</option>
-        <option value="baduy">Ba Duy</option>
-        <option value="70h15591">70H-15591</option>
-      </select>
-
-      <label>Mật khẩu</label>
-      <div style="position: relative; margin-bottom:20px;">
-        <input type="password" id="passwordInput" placeholder="Nhập mật khẩu" 
-               style="width:100%; padding:14px 45px 14px 14px; border-radius:12px;">
-        <span id="togglePassword" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #64748b; font-size: 1.3rem;">
-          <i class="fas fa-eye"></i>
-        </span>
-      </div>
-
-      <button onclick="handleLogin()" class="btn btn-primary" style="width:100%; padding:14px; font-size:1.1rem;">
-        <i class="fas fa-sign-in-alt"></i> Đăng nhập
-      </button>
-
-      <div id="loginMessage" style="margin-top:15px; text-align:center; min-height:24px;"></div>
-    </div>
-  </div>
-</div>
-
-<header style="text-align: center; margin-bottom: 25px;">
-    <h1><i class="fas fa-car"></i> CarRent</h1>
-    <p class="subtitle">Quản lý thuê xe thông minh</p>
-    
-    <!-- User Info - Đặt dưới title và căn giữa -->
-    <div id="userInfo" class="user-info" style="display: none; margin: 15px auto; width: fit-content;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <i class="fas fa-user-circle" style="font-size: 1.8rem; color: #64748b;"></i>
-            <div style="text-align: left;">
-                <div class="user-name" id="displayUserName" style="font-size: 1.1rem;"></div>
-                <small id="displayUserRole" style="color: #64748b;"></small>
-            </div>
-            <button onclick="logout()" class="logout-btn">
-                <i class="fas fa-sign-out-alt"></i> Đăng xuất
-            </button>
-        </div>
-    </div>
-</header>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-car"></i> CarRent</h1>
+      <p class="subtitle">Quản lý thuê xe thông minh</p>
+    </header>
 
   <div class="tabs">
     <div class="tab active" onclick="switchTab(0)">📋 Hợp đồng đang xử lý</div>
@@ -1219,7 +1122,7 @@ body.pro-mode #actionPopup {
 <script>
 // ==================== FIREBASE CONFIG ====================
 const firebaseConfig = {
-  databaseURL: "https://carrent-2026-default-rtdb.asia-southeast1.firebasedatabase.app/"
+  databaseURL: "https://carrent-2026-default-rtdb.asia-southeast1.firebasedatabase.appp/"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -1248,127 +1151,7 @@ let currentRevenueType = '';
 let currentContractType = 'normal';
 let currentActionContractId = null;
 
-// ==================== LOGIN SYSTEM ====================
-let currentUser = null;
-
-const USERS = {
-  "baduy": {
-    name: "Ba Duy",
-    password: "duylan1235",
-    role: "full"
-  },
-  "70h15591": {
-    name: "70H-15591",
-    password: "carrent123",
-    role: "limited",
-    plateFilter: "70H-15591"
-  }
-};
-
-function handleLogin() {
-  const username = document.getElementById('usernameSelect').value;
-  const password = document.getElementById('passwordInput').value.trim();
-  const messageEl = document.getElementById('loginMessage');
-
-  if (!username) {
-    messageEl.innerHTML = `<span style="color:#dc2626;">Vui lòng chọn tài khoản</span>`;
-    return;
-  }
-
-  const user = USERS[username];
-  if (user && user.password === password) {
-    currentUser = {
-      username: username,
-      name: user.name,
-      role: user.role,
-      plateFilter: user.plateFilter
-    };
-
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    document.getElementById('loginModal').style.display = 'none';
-    
-    updateUserInfo();
-    showToast(`Đăng nhập thành công: ${user.name}`);
-    renderAll();
-  } else {
-    messageEl.innerHTML = `<span style="color:#dc2626;">❌ Sai mật khẩu!</span>`;
-    document.getElementById('passwordInput').value = '';
-  }
-}
-
-function updateUserInfo() {
-  const userInfo = document.getElementById('userInfo');
-  if (!currentUser) {
-    userInfo.style.display = 'none';
-    return;
-  }
-
-  userInfo.style.display = 'flex';
-  document.getElementById('displayUserName').textContent = currentUser.name;
-  
-  const roleEl = document.getElementById('displayUserRole');
-  roleEl.textContent = currentUser.role === 'full' ? 'Quản trị viên' : 'Người dùng giới hạn';
-}
-
-function logout() {
-  if (confirm("Bạn có chắc muốn đăng xuất?")) {
-    currentUser = null;
-    localStorage.removeItem('currentUser');
-    document.getElementById('loginModal').style.display = 'flex';
-    document.getElementById('passwordInput').value = '';
-    document.getElementById('userInfo').style.display = 'none';
-    showToast("Đã đăng xuất");
-  }
-}
-
-// Kiểm tra đăng nhập khi load
-function checkLogin() {
-  const savedUser = localStorage.getItem('currentUser');
-  if (savedUser) {
-    currentUser = JSON.parse(savedUser);
-    document.getElementById('loginModal').style.display = 'none';
-    updateUserInfo();
-  }
-}
-
 // ==================== HELPER FUNCTIONS (giữ nguyên) ====================
-// ==================== HELPER FUNCTIONS ====================
-function getFilteredContracts() {
-    let filtered = contracts;
-
-    // === LỌC THEO QUYỀN LIMITED ===
-    if (currentUser && currentUser.role === "limited" && currentUser.plateFilter) {
-        filtered = filtered.filter(c => c.plate === currentUser.plateFilter);
-    }
-
-    // === LỌC LỊCH SỬ CHO 70H-15591: chỉ từ tháng 6/2026 ===
-    if (currentUser && currentUser.username === "70h15591") {
-        const cutoffDate = new Date("2026-06-01");
-        filtered = filtered.filter(c => {
-            if (c.status !== "Đã hoàn tất") return true;
-            const rentDate = new Date(c.rentDate);
-            return rentDate >= cutoffDate;
-        });
-    }
-
-    return filtered;
-}
-
-function getFilteredCars() {
-    if (currentUser && currentUser.role === "limited" && currentUser.plateFilter) {
-        return cars.filter(c => c.plate === currentUser.plateFilter);
-    }
-    return cars;
-}
-
-// Chỉ cho phép chọn xe thuộc quyền
-function getAvailableCarsForContract() {
-    if (currentUser && currentUser.role === "limited" && currentUser.plateFilter) {
-        return cars.filter(c => c.plate === currentUser.plateFilter);
-    }
-    return cars;
-}
-
 function formatMoney(num) {
   return Number(num || 0).toLocaleString('vi-VN').replace(/,/g, ' ');
 }
@@ -1514,10 +1297,6 @@ console.log("Số lượng xe:", cars.length, "| Số hợp đồng:", contracts
       if (migrated) saveData();
 
       renderAll();
-      // Sau dòng: renderAll();
-if (currentUser && currentUser.role === "limited") {
-  document.getElementById('tab1').querySelector('button').style.display = 'none'; // Ẩn nút "Thêm xe mới"
-}
       populateRevenueFilters();
 
       if (isFirstLoad) {
@@ -2089,8 +1868,7 @@ function renderActiveContracts() {
   const tbody = document.getElementById('activeContractBody');
   tbody.innerHTML = '';
 
-  // Lọc theo quyền người dùng
-  let filtered = getFilteredContracts().filter(c => c.status !== "Đã hoàn tất");
+  let filtered = contracts.filter(c => c.status !== "Đã hoàn tất");
 
   if (currentSearch) {
     const term = currentSearch.toLowerCase();
@@ -2106,6 +1884,8 @@ function renderActiveContracts() {
   }
 
   filtered.sort((a, b) => new Date(a.rentDate) - new Date(b.rentDate));
+
+  console.log(`✅ Đã render ${filtered.length} hợp đồng đang xử lý`);
 
   filtered.forEach(contract => {
     try {
@@ -2144,18 +1924,22 @@ function renderActiveContracts() {
       tr.style.cursor = 'pointer';
       
       tr.addEventListener('click', function(e) {
-        if (e.target.closest('button') || e.target.closest('select') || 
-            e.target.closest('.note') || e.target.closest('small')) {
-          return;
-        }
-        e.stopImmediatePropagation();
-        showActionPopup(contract.id);
+          if (e.target.closest('button') || 
+              e.target.closest('select') || 
+              e.target.closest('.note') || 
+              e.target.closest('small')) {
+              return;
+          }
+          e.stopImmediatePropagation();
+          showActionPopup(contract.id);
       });
-
       let rowClass = '';
+
+      // === ĐỔI MÀU XANH DƯƠNG cho tất cả hợp đồng "Chưa nhận xe" đã đến hoặc quá ngày nhận ===
       if (contract.status === "Chưa nhận xe" && isReceivePastOrToday(contract)) {
         rowClass = 'waiting-today';
-      } else if (contract.status === "Đang thuê") {
+      } 
+      else if (contract.status === "Đang thuê") {
         if (isOverdue(contract)) rowClass = 'overdue';
         else if (isReturnToday(contract)) rowClass = 'due-today';
       }
@@ -2199,26 +1983,16 @@ function renderCars() {
   const tbody = document.getElementById('carBody');
   tbody.innerHTML = '';
   
-  const displayCars = getFilteredCars();
-
-  if (displayCars.length === 0) {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td colspan="8" style="text-align:center; color:#64748b; padding:30px;">
-      Không có xe nào được quản lý
-    </td>`;
-    tbody.appendChild(tr);
-    return;
-  }
-
-  displayCars.forEach(car => {
+  cars.forEach(car => {
     const busy = contracts.some(c => c.plate === car.plate && c.status !== "Đã hoàn tất");
     const statusHTML = busy ? 
       `<span class="status busy">Đang có lịch</span>` : 
       `<span class="status available">Đang rảnh</span>`;
 
     const tr = document.createElement('tr');
-    tr.style.cursor = 'pointer';
+    tr.style.cursor = 'pointer';                    // Thêm con trỏ tay
     tr.onclick = (e) => {
+      // Nếu click vào button thì không mở lịch (ngăn event bubble)
       if (e.target.closest('button')) return;
       showCarSchedule(car.id);
     };
@@ -2241,11 +2015,10 @@ function renderCars() {
                 class="btn btn-edit" style="padding:8px 12px;">
           <i class="fas fa-edit"></i>
         </button>
-        ${currentUser?.role === "full" ? `
         <button onclick="deleteCar(${car.id}); event.stopImmediatePropagation();" 
                 class="btn btn-danger" style="padding:8px 12px;">
           <i class="fas fa-trash"></i>
-        </button>` : ''}
+        </button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -2317,15 +2090,9 @@ function renderCompletedContracts() {
   tbody.innerHTML = '';
   let totalRevenue = 0;
 
-  let filtered = getFilteredContracts().filter(c => c.status === "Đã hoàn tất");
+  let filtered = contracts.filter(c => c.status === "Đã hoàn tất");
 
-  // Bộ lọc thêm cho user 70H-15591 (để chắc chắn)
-  if (currentUser && currentUser.username === "70h15591") {
-    const cutoffDate = new Date("2026-06-01");
-    filtered = filtered.filter(c => new Date(c.rentDate) >= cutoffDate);
-  }
-
-  // Các bộ lọc người dùng chọn
+  // === BỘ LỌC ĐẦY ĐỦ ===
   if (currentRevenueYear) {
     filtered = filtered.filter(c => new Date(c.rentDate).getFullYear().toString() === currentRevenueYear);
   }
@@ -2339,6 +2106,7 @@ function renderCompletedContracts() {
     filtered = filtered.filter(c => (c.contractType || 'normal') === currentRevenueType);
   }
 
+  // Sắp xếp theo ngày nhận xe
   filtered.sort((a, b) => new Date(a.rentDate) - new Date(b.rentDate));
 
   // Tiêu đề động
@@ -2353,6 +2121,7 @@ function renderCompletedContracts() {
   if (currentRevenueType) {
     titleText += currentRevenueType === 'app' ? " (Đặt qua app)" : " (Thuê thường)";
   }
+
   document.getElementById('revenueTitle').textContent = titleText;
 
   filtered.forEach(contract => {
@@ -2541,20 +2310,12 @@ function showAddContractModal() {
 
   const sel = document.getElementById('carSelect');
   sel.innerHTML = '<option value="">Chọn xe</option>';
-
-  const availableCars = getAvailableCarsForContract();
-
-  availableCars.forEach(car => {
+  cars.forEach(car => {
     const opt = document.createElement('option');
     opt.value = car.id;
     opt.textContent = `${car.type} - ${car.plate}`;
     sel.appendChild(opt);
   });
-
-  // Nếu là user limited và chỉ có 1 xe → tự động chọn
-  if (currentUser?.role === "limited" && availableCars.length === 1) {
-    sel.value = availableCars[0].id;
-  }
 
   updateCustomerDatalists();
   document.getElementById('contractModal').style.display = 'flex';
@@ -2563,10 +2324,6 @@ function showAddContractModal() {
 function closeModal() { document.getElementById('contractModal').style.display = 'none'; }
 
 function showAddCarModal() {
-  if (currentUser && currentUser.role === "limited") {
-    alert("Bạn không có quyền thêm xe mới!");
-    return;
-  }
   document.getElementById('carModalTitle').textContent = "Thêm xe mới";
   document.getElementById('carSubmitBtn').textContent = "Thêm xe";
   document.getElementById('carId').value = '';
@@ -2597,30 +2354,14 @@ function editContract(id) {
 
   const sel = document.getElementById('carSelect');
   sel.innerHTML = '<option value="">Chọn xe</option>';
-
-  // === SỬA Ở ĐÂY: Chỉ cho phép xe thuộc quyền ===
-  const availableCars = getAvailableCarsForContract();
-
-  availableCars.forEach(car => {
+  cars.forEach(car => {
     const opt = document.createElement('option');
     opt.value = car.id;
     opt.textContent = `${car.type} - ${car.plate}`;
-    
-    // Nếu xe của hợp đồng đang sửa trùng với xe được phép → chọn mặc định
-    if (car.plate === contract.plate) {
-      opt.selected = true;
-    }
+    if (car.plate === contract.plate) opt.selected = true;
     sel.appendChild(opt);
   });
 
-  // === KHÓA dropdown nếu là user limited (không cho đổi xe) ===
-  if (currentUser?.role === "limited") {
-    sel.disabled = true;
-  } else {
-    sel.disabled = false;
-  }
-
-  // Điền thông tin còn lại
   document.getElementById('customerName').value = contract.customer || '';
   document.getElementById('phone').value = contract.phone || '';
   document.getElementById('rentDate').value = contract.rentDate || '';
@@ -2640,7 +2381,6 @@ function editContract(id) {
     document.getElementById('customTotalPrice').value = contract.customTotalPrice;
   }
 
-  // Phụ phí
   const extraList = document.getElementById('extraFeesList');
   extraList.innerHTML = '';
   (contract.extraFees || []).forEach(fee => {
@@ -2730,16 +2470,9 @@ function editCar(id) {
 }
 
 function deleteCar(id) {
-  // Kiểm tra quyền - User limited (70H-15591) không được xóa xe
-  if (currentUser && currentUser.role === "limited") {
-    alert("❌ Bạn không có quyền xóa xe!");
-    return;
-  }
-
   const car = cars.find(c => c.id === id);
   if (!car) return;
 
-  // Kiểm tra có hợp đồng đang xử lý không
   const activeContracts = contracts.filter(c => 
     c.plate === car.plate && c.status !== "Đã hoàn tất"
   );
@@ -2749,18 +2482,15 @@ function deleteCar(id) {
     return;
   }
 
-  // Xác nhận xóa
   showSimpleConfirm("Xóa xe", 
-    `Bạn có chắc muốn xóa xe <strong>${car.type} - ${car.plate}</strong>?<br><br>
-     <span style="color:#dc2626;">Hành động này không thể hoàn tác.</span>`, 
+    `Bạn có chắc muốn xóa xe <strong>${car.type} - ${car.plate}</strong>?<br><strong>Hành động này không thể hoàn tác.</strong>`, 
     () => {
       cars = cars.filter(c => c.id !== id);
       renderAll();
       saveData();
-      showToast(`Xe ${car.plate} đã được xóa thành công.`);
+      showToast("Xe đã được xóa.");
     });
 }
-
 
 // ====================== FORM CONTRACT SUBMIT ======================
 document.getElementById('contractForm').addEventListener('submit', e => {
@@ -2952,25 +2682,8 @@ document.getElementById('carForm').addEventListener('submit', e => {
   saveData();   // ← thay saveData(); thành cái này
 });
 
-// ==================== TOGGLE MẬT KHẨU ====================
-function togglePasswordVisibility() {
-  const passwordInput = document.getElementById('passwordInput');
-  const toggleIcon = document.getElementById('togglePassword');
-
-  if (passwordInput.type === "password") {
-    passwordInput.type = "text";
-    toggleIcon.innerHTML = `<i class="fas fa-eye-slash"></i>`;
-  } else {
-    passwordInput.type = "password";
-    toggleIcon.innerHTML = `<i class="fas fa-eye"></i>`;
-  }
-}
-
-// Thêm event listener sau khi DOM load
-
 // ====================== KHỞI ĐỘNG ======================
 window.onload = async () => {
-  checkLogin();
   await loadData();
       // === MIGRATION: Sửa dữ liệu cũ có undefined ===
       contracts.forEach(c => {
@@ -3189,11 +2902,7 @@ function checkProAccess() {
         proContent.style.display = 'none';
     }
 }
-// Toggle mật khẩu
-const toggleBtn = document.getElementById('togglePassword');
-if (toggleBtn) {
-  toggleBtn.addEventListener('click', togglePasswordVisibility);
-}
+
 </script>
 </body>
 </html>
