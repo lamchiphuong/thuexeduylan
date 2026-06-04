@@ -615,6 +615,38 @@ body.pro-mode #actionPopup {
 #loginModal .modal-content {
   animation: modalPop 0.4s ease;
 }
+
+/* === USER INFO & LOGOUT === */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: white;
+    padding: 8px 16px;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 15px;
+}
+
+.user-name {
+    font-weight: 600;
+    color: var(--primary-dark);
+}
+
+.logout-btn {
+    padding: 6px 14px;
+    font-size: 0.9rem;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+}
+
+.logout-btn:hover {
+    background: #dc2626;
+}
+
   </style>
 </head>
 <body>
@@ -652,11 +684,24 @@ body.pro-mode #actionPopup {
   </div>
 </div>
 
-  <div class="container">
-    <header>
-      <h1><i class="fas fa-car"></i> CarRent</h1>
-      <p class="subtitle">Quản lý thuê xe thông minh</p>
-    </header>
+<header style="text-align: center; margin-bottom: 25px;">
+    <h1><i class="fas fa-car"></i> CarRent</h1>
+    <p class="subtitle">Quản lý thuê xe thông minh</p>
+    
+    <!-- User Info - Đặt dưới title và căn giữa -->
+    <div id="userInfo" class="user-info" style="display: none; margin: 15px auto; width: fit-content;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <i class="fas fa-user-circle" style="font-size: 1.8rem; color: #64748b;"></i>
+            <div style="text-align: left;">
+                <div class="user-name" id="displayUserName" style="font-size: 1.1rem;"></div>
+                <small id="displayUserRole" style="color: #64748b;"></small>
+            </div>
+            <button onclick="logout()" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Đăng xuất
+            </button>
+        </div>
+    </div>
+</header>
 
   <div class="tabs">
     <div class="tab active" onclick="switchTab(0)">📋 Hợp đồng đang xử lý</div>
@@ -1204,7 +1249,8 @@ let currentContractType = 'normal';
 let currentActionContractId = null;
 
 // ==================== LOGIN SYSTEM ====================
-let currentUser = null;           // { username, role, plateFilter }
+let currentUser = null;
+
 const USERS = {
   "baduy": {
     name: "Ba Duy",
@@ -1240,13 +1286,28 @@ function handleLogin() {
 
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
     document.getElementById('loginModal').style.display = 'none';
-    showToast(`Đăng nhập thành công: ${user.name}`);
     
-    renderAll();           // Render lại dữ liệu theo quyền
+    updateUserInfo();
+    showToast(`Đăng nhập thành công: ${user.name}`);
+    renderAll();
   } else {
     messageEl.innerHTML = `<span style="color:#dc2626;">❌ Sai mật khẩu!</span>`;
     document.getElementById('passwordInput').value = '';
   }
+}
+
+function updateUserInfo() {
+  const userInfo = document.getElementById('userInfo');
+  if (!currentUser) {
+    userInfo.style.display = 'none';
+    return;
+  }
+
+  userInfo.style.display = 'flex';
+  document.getElementById('displayUserName').textContent = currentUser.name;
+  
+  const roleEl = document.getElementById('displayUserRole');
+  roleEl.textContent = currentUser.role === 'full' ? 'Quản trị viên' : 'Người dùng giới hạn';
 }
 
 function logout() {
@@ -1255,6 +1316,8 @@ function logout() {
     localStorage.removeItem('currentUser');
     document.getElementById('loginModal').style.display = 'flex';
     document.getElementById('passwordInput').value = '';
+    document.getElementById('userInfo').style.display = 'none';
+    showToast("Đã đăng xuất");
   }
 }
 
@@ -1264,6 +1327,7 @@ function checkLogin() {
   if (savedUser) {
     currentUser = JSON.parse(savedUser);
     document.getElementById('loginModal').style.display = 'none';
+    updateUserInfo();
   }
 }
 
