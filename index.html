@@ -1268,11 +1268,11 @@ function checkLogin() {
 }
 
 // ==================== HELPER FUNCTIONS (giữ nguyên) ====================
-// Thêm hàm này vào phần HELPER FUNCTIONS
+// ==================== HELPER FUNCTIONS ====================
 function getFilteredContracts() {
     let filtered = contracts;
 
-    // Lọc theo biển số cho tài khoản limited
+    // === LỌC THEO QUYỀN LIMITED ===
     if (currentUser && currentUser.role === "limited" && currentUser.plateFilter) {
         filtered = filtered.filter(c => c.plate === currentUser.plateFilter);
     }
@@ -1281,7 +1281,7 @@ function getFilteredContracts() {
     if (currentUser && currentUser.username === "70h15591") {
         const cutoffDate = new Date("2026-06-01");
         filtered = filtered.filter(c => {
-            if (c.status !== "Đã hoàn tất") return true; // vẫn xem bình thường các hợp đồng đang xử lý
+            if (c.status !== "Đã hoàn tất") return true;
             const rentDate = new Date(c.rentDate);
             return rentDate >= cutoffDate;
         });
@@ -1296,6 +1296,15 @@ function getFilteredCars() {
     }
     return cars;
 }
+
+// Chỉ cho phép chọn xe thuộc quyền
+function getAvailableCarsForContract() {
+    if (currentUser && currentUser.role === "limited" && currentUser.plateFilter) {
+        return cars.filter(c => c.plate === currentUser.plateFilter);
+    }
+    return cars;
+}
+
 function formatMoney(num) {
   return Number(num || 0).toLocaleString('vi-VN').replace(/,/g, ' ');
 }
@@ -1441,6 +1450,10 @@ console.log("Số lượng xe:", cars.length, "| Số hợp đồng:", contracts
       if (migrated) saveData();
 
       renderAll();
+      // Sau dòng: renderAll();
+if (currentUser && currentUser.role === "limited") {
+  document.getElementById('tab1').querySelector('button').style.display = 'none'; // Ẩn nút "Thêm xe mới"
+}
       populateRevenueFilters();
 
       if (isFirstLoad) {
@@ -2124,6 +2137,15 @@ function renderCars() {
   
   const displayCars = getFilteredCars();
 
+  if (displayCars.length === 0) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td colspan="8" style="text-align:center; color:#64748b; padding:30px;">
+      Không có xe nào được quản lý
+    </td>`;
+    tbody.appendChild(tr);
+    return;
+  }
+
   displayCars.forEach(car => {
     const busy = contracts.some(c => c.plate === car.plate && c.status !== "Đã hoàn tất");
     const statusHTML = busy ? 
@@ -2155,16 +2177,16 @@ function renderCars() {
                 class="btn btn-edit" style="padding:8px 12px;">
           <i class="fas fa-edit"></i>
         </button>
+        ${currentUser?.role === "full" ? `
         <button onclick="deleteCar(${car.id}); event.stopImmediatePropagation();" 
                 class="btn btn-danger" style="padding:8px 12px;">
           <i class="fas fa-trash"></i>
-        </button>
+        </button>` : ''}
       </td>
     `;
     tbody.appendChild(tr);
   });
 }
-
 function populateRevenueFilters() {
   // Populate Năm
   const years = new Set();
@@ -2455,12 +2477,20 @@ function showAddContractModal() {
 
   const sel = document.getElementById('carSelect');
   sel.innerHTML = '<option value="">Chọn xe</option>';
-  cars.forEach(car => {
+
+  const availableCars = getAvailableCarsForContract();
+
+  availableCars.forEach(car => {
     const opt = document.createElement('option');
     opt.value = car.id;
     opt.textContent = `${car.type} - ${car.plate}`;
     sel.appendChild(opt);
   });
+
+  // Nếu là user limited và chỉ có 1 xe → tự động chọn
+  if (currentUser?.role === "limited" && availableCars.length === 1) {
+    sel.value = availableCars[0].id;
+  }
 
   updateCustomerDatalists();
   document.getElementById('contractModal').style.display = 'flex';
@@ -2469,6 +2499,10 @@ function showAddContractModal() {
 function closeModal() { document.getElementById('contractModal').style.display = 'none'; }
 
 function showAddCarModal() {
+  if (currentUser && currentUser.role === "limited") {
+    alert("Bạn không có quyền thêm xe mới!");
+    return;
+  }
   document.getElementById('carModalTitle').textContent = "Thêm xe mới";
   document.getElementById('carSubmitBtn').textContent = "Thêm xe";
   document.getElementById('carId').value = '';
@@ -2499,14 +2533,30 @@ function editContract(id) {
 
   const sel = document.getElementById('carSelect');
   sel.innerHTML = '<option value="">Chọn xe</option>';
-  cars.forEach(car => {
+
+  // === SỬA Ở ĐÂY: Chỉ cho phép xe thuộc quyền ===
+  const availableCars = getAvailableCarsForContract();
+
+  availableCars.forEach(car => {
     const opt = document.createElement('option');
     opt.value = car.id;
     opt.textContent = `${car.type} - ${car.plate}`;
-    if (car.plate === contract.plate) opt.selected = true;
+    
+    // Nếu xe của hợp đồng đang sửa trùng với xe được phép → chọn mặc định
+    if (car.plate === contract.plate) {
+      opt.selected = true;
+    }
     sel.appendChild(opt);
   });
 
+  // === KHÓA dropdown nếu là user limited (không cho đổi xe) ===
+  if (currentUser?.role === "limited") {
+    sel.disabled = true;
+  } else {
+    sel.disabled = false;
+  }
+
+  // Điền thông tin còn lại
   document.getElementById('customerName').value = contract.customer || '';
   document.getElementById('phone').value = contract.phone || '';
   document.getElementById('rentDate').value = contract.rentDate || '';
@@ -2526,6 +2576,7 @@ function editContract(id) {
     document.getElementById('customTotalPrice').value = contract.customTotalPrice;
   }
 
+  // Phụ phí
   const extraList = document.getElementById('extraFeesList');
   extraList.innerHTML = '';
   (contract.extraFees || []).forEach(fee => {
@@ -2615,9 +2666,16 @@ function editCar(id) {
 }
 
 function deleteCar(id) {
+  // Kiểm tra quyền - User limited (70H-15591) không được xóa xe
+  if (currentUser && currentUser.role === "limited") {
+    alert("❌ Bạn không có quyền xóa xe!");
+    return;
+  }
+
   const car = cars.find(c => c.id === id);
   if (!car) return;
 
+  // Kiểm tra có hợp đồng đang xử lý không
   const activeContracts = contracts.filter(c => 
     c.plate === car.plate && c.status !== "Đã hoàn tất"
   );
@@ -2627,15 +2685,18 @@ function deleteCar(id) {
     return;
   }
 
+  // Xác nhận xóa
   showSimpleConfirm("Xóa xe", 
-    `Bạn có chắc muốn xóa xe <strong>${car.type} - ${car.plate}</strong>?<br><strong>Hành động này không thể hoàn tác.</strong>`, 
+    `Bạn có chắc muốn xóa xe <strong>${car.type} - ${car.plate}</strong>?<br><br>
+     <span style="color:#dc2626;">Hành động này không thể hoàn tác.</span>`, 
     () => {
       cars = cars.filter(c => c.id !== id);
       renderAll();
       saveData();
-      showToast("Xe đã được xóa.");
+      showToast(`Xe ${car.plate} đã được xóa thành công.`);
     });
 }
+
 
 // ====================== FORM CONTRACT SUBMIT ======================
 document.getElementById('contractForm').addEventListener('submit', e => {
