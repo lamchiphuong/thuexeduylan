@@ -5,26 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CarRent - Quản Lý Thuê Xe</title>
   
+<!-- ==================== PWA ICONS & MANIFEST ==================== -->
   <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
-  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="https://cdn-icons-png.flaticon.com/512/19006/19006139.png">
-
-  <link rel="manifest" href="data:application/manifest+json,{
-    &quot;name&quot;:&quot;CarRent - Quản Lý Thuê Xe&quot;,
-    &quot;short_name&quot;:&quot;CarRent&quot;,
-    &quot;description&quot;:&quot;Quản lý thuê xe thông minh&quot;,
-    &quot;start_url&quot;:&quot;.&quot;,
-    &quot;display&quot;:&quot;standalone&quot;,
-    &quot;background_color&quot;:&quot;#f8fafc&quot;,
-    &quot;theme_color&quot;:&quot;#2563eb&quot;,
-    &quot;icons&quot;:[{
-      &quot;src&quot;:&quot;https://cdn-icons-png.flaticon.com/512/19006/19006139.png&quot;,
-      &quot;sizes&quot;:&quot;512x512&quot;,
-      &quot;type&quot;:&quot;image/png&quot;,
-      &quot;purpose&quot;:&quot;any maskable&quot;
-    }]
-  }">
-
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <!-- ==================== FIREBASE SDK ==================== -->
@@ -107,10 +89,10 @@
       font-weight: 600;
     }
 
-    tr.waiting-today { background: #dbeafe !important; }
+    tr.waiting-today { background: #d1fae5 !important; }
     tr.due-today     { background: #fef3c7 !important; }
     tr.overdue       { background: #fee2e2 !important; }
-
+    tr.dang-thue-normal { background: #dbeafe !important; }
     tr:hover { background: #f1f5f9 !important; cursor: pointer; }
 
     .status {
@@ -610,7 +592,7 @@ body.pro-mode #actionPopup {
     <div class="tab active" onclick="switchTab(0)">📋 Hợp đồng đang xử lý</div>
     <div class="tab" onclick="switchTab(1)">🚗 Quản lý xe</div>
     <div class="tab" onclick="switchTab(2)">📊 Lịch sử & Doanh thu</div>
-    <div class="tab" onclick="switchTab(3)" id="proTab">👑 Bộ quản lý Pro</div>
+    <div class="tab" onclick="switchTab(3)" id="proTab">⭐ Bộ quản lý Pro</div>
   </div>
 
     <!-- Tab 0 -->
@@ -1107,7 +1089,7 @@ body.pro-mode #actionPopup {
   </div>
 
   <div class="version">
-    CarRent v1.3.4 - 2026
+    CarRent v1.3.5 - 2026
   </div>
 
   <!-- Loading Overlay -->
@@ -1122,7 +1104,7 @@ body.pro-mode #actionPopup {
 <script>
 // ==================== FIREBASE CONFIG ====================
 const firebaseConfig = {
-  databaseURL: "https://carrent-2026-default-rtdb.asia-southeast1.firebasedatabase.appp/"
+  databaseURL: "https://carrent-2026-default-rtdb.asia-southeast1.firebasedatabase.app/"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -1321,7 +1303,7 @@ console.log("Số lượng xe:", cars.length, "| Số hợp đồng:", contracts
     if (loading.classList.contains('show')) {
       console.error("⏰ Timeout - Không nhận được dữ liệu từ server");
       loading.classList.remove('show');
-      alert("Không thể kết nối server.\n\nChúng tôi đang nỗ lực sửa chữa lỗi. Vui lòng chờ ...");
+      alert("Không thể kết nối server sau 8 giây.\n\n1. Kiểm tra Rules\n2. Kiểm tra tên project");
     }
   }, 8000);
 }
@@ -1935,13 +1917,18 @@ function renderActiveContracts() {
       });
       let rowClass = '';
 
-      // === ĐỔI MÀU XANH DƯƠNG cho tất cả hợp đồng "Chưa nhận xe" đã đến hoặc quá ngày nhận ===
+      // === XỬ LÝ MÀU NỀN THEO TRẠNG THÁI ===
       if (contract.status === "Chưa nhận xe" && isReceivePastOrToday(contract)) {
         rowClass = 'waiting-today';
       } 
       else if (contract.status === "Đang thuê") {
-        if (isOverdue(contract)) rowClass = 'overdue';
-        else if (isReturnToday(contract)) rowClass = 'due-today';
+        if (isOverdue(contract)) {
+          rowClass = 'overdue';
+        } else if (isReturnToday(contract)) {
+          rowClass = 'dang-thue-normal';
+        } else {
+          rowClass = 'dang-thue-normal';     // ← Màu xanh lá nhạt
+        }
       }
       tr.className = rowClass;
 
@@ -2773,7 +2760,7 @@ if (document.getElementById('tab3').style.display === 'block') {
   checkProAccess();
 }
 
-  console.log("🚀 CarRent v1.3.4");
+  console.log("🚀 CarRent v1.3.5");
 };
 
 function formatPriceInput(e) {
